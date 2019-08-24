@@ -1,0 +1,6 @@
+book_filename: "Statistical Modeling of High Dimensional Counts"
+delete_merged_file: true
+language:
+  ui:
+    chapter_name: "Chapter "
+rmd_files: ["index.Rmd", "intro.Rmd"]
