@@ -3,5 +3,7 @@ delete_merged_file: true
 language:
   ui:
     chapter_name: "Chapter "
-rmd_files: ["index.Rmd", "intro.Rmd"]
+rmd_files: ["index.Rmd", "quantification.Rmd", 
+            "model.Rmd", "transcripts.Rmd", 
+            "downstream.Rmd", "limits.Rmd"]
 output_dir: "docs"

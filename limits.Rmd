@@ -1,0 +1,8 @@
+# Limitations and extensions {#limits}
+
+Here is some more text
+
+* Single cell
+* Long reads 
+* Genetic variation
+* Microbiome
