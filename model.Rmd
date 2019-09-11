@@ -4,3 +4,78 @@ Here is some more text
 
 * Counts, sequencing depth, precision
 * Marginal testing, multiple correction, IHW
+
+```{r}
+assayNames(gse)
+cs <- colSums(assay(gse, "counts"))
+hist(cs/1e6, col="grey", border="white")
+```
+
+```{r}
+colData(gse)
+cts <- assay(gse, "counts")[,c(1,4)]
+idx <- rowSums(cts >= 5) == 2
+cts <- cts[idx,]
+p <- sweep(cts, 2, colSums(cts), "/")
+```
+
+```{r}
+library(rafalib)
+maplot(log10(p[,1]), log10(p[,2]), n=nrow(p), 
+       cex=.3, col=rgb(0,0,0,.2))
+abline(h=0, col=rgb(0,0,1,.5))
+```
+
+```{r}
+mean.log.p <- rowMeans(log10(p))
+hist(mean.log.p,  col="grey", border="white")
+```
+
+```{r}
+library(rafalib)
+maplot(log10(p[,1]), log10(p[,2]), n=nrow(p),
+       xlim=c(-6.5, -3.5), ylim=c(-2,2),
+       cex=.3, col=rgb(0,0,0,.2))
+abline(h=0, col=rgb(0,0,1,.5))
+```
+
+```{r}
+lfc <- log2(p[,2]) - log2(p[,1])
+hist(lfc[between(mean.log.p, -6, -4)], 
+     breaks=seq(-10,10,by=.1),
+     xlim=c(-5,5),
+     col="grey50", border="white")
+```
+
+```{r}
+sim.cts <- matrix(rpois(nrow(p) * 2, 30e6 * p[,1]), ncol=2)
+colSums(sim.cts)
+idx <- rowSums(sim.cts >= 5) == 2
+sim.cts <- sim.cts[idx,]
+sim.p <- sweep(sim.cts, 2, colSums(sim.cts), "/")
+maplot(log10(sim.p[,1]), log10(sim.p[,2]), n=nrow(p), 
+       cex=.3, col=rgb(0,0,0,.2))
+abline(h=0, col=rgb(0,0,1,.5))
+```
+
+```{r}
+library(DESeq2)
+dds <- DESeqDataSet(gse, ~line + line:condition)
+keep <- rowSums(counts(dds) >= 10) >= 3
+table(keep)
+dds <- dds[keep,]
+```
+
+```{r}
+dds <- DESeq(dds)
+```
+
+```{r}
+plotDispEsts(dds, ylim=c(1e-3, .5), xlim=c(5,1e5))
+```
+
+```{r}
+resultsNames(dds)
+res <- results(dds, name="lineOCT4.conditiontrt")
+```
+

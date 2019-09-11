@@ -5,3 +5,44 @@ Here is some more text
 * Salmon
 * tximeta
 * Alevin
+
+```{r}
+dir <- system.file("extdata", package="oct4")
+list.files(dir)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+coldata <- read_csv(file.path(dir,"coldata.csv"))
+coldata <- coldata %>% mutate(line=factor(line, levels=c("OCT4","BRG1")),
+                              condition=factor(condition, levels=c("untrt","trt")),
+                              files=file.path(dir, "quants", names, "quant.sf.gz"))
+```
+
+```{r}
+all(file.exists(coldata$files))
+```
+
+```{r}
+library(tximeta)
+library(SummarizedExperiment)
+se <- tximeta(coldata, dropInfReps=TRUE)
+```
+
+```{r}
+assayNames(se)
+rowRanges(se)
+```
+
+```{r}
+gse <- summarizeToGene(se)
+```
+
+```{r}
+rowRanges(gse)
+x <- GRanges("chr1", IRanges(10e6, 11e6))
+gse[gse %over% x, ]
+gse[, gse$line == "OCT4"]
+```
+
