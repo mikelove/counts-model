@@ -77,5 +77,75 @@ plotDispEsts(dds, ylim=c(1e-3, .5), xlim=c(5,1e5))
 ```{r}
 resultsNames(dds)
 res <- results(dds, name="lineOCT4.conditiontrt")
+summary(res)
 ```
 
+```{r}
+library(apeglm)
+lfc <- lfcShrink(dds, coef="lineOCT4.conditiontrt", type="apeglm")
+```
+
+
+```{r}
+plotMA(res, ylim=c(-4,4), 
+       colNonSig="grey60", colSig="blue", colLine="grey40")
+```
+
+```{r}
+plotMA(lfc, ylim=c(-4,4), 
+       colNonSig="grey60", colSig="blue", colLine="grey40")
+```
+
+
+```{r}
+lfc$SYMBOL <- mcols(dds)$SYMBOL
+tab <- lfc %>% as.data.frame %>%
+        filter(between(baseMean, 1e4, 1e5), 
+               between(abs(log2FoldChange), 1, 4))
+tab <- tab[complete.cases(tab),]
+```
+
+```{r}
+plotMA(lfc, ylim=c(-4,4),
+       colNonSig="grey60", colSig="blue", colLine="grey40")
+with(tab, {
+        points(baseMean, log2FoldChange, cex=2, col="blue")
+        text(baseMean, log2FoldChange, SYMBOL, pos=4, col="blue")
+})
+```
+
+```{r}
+dat <- as.data.frame(lfc)
+dat <- dat[complete.cases(dat),]
+dat <- dat %>% mutate(sig = ifelse(padj < .1, "Y", "N"))
+tab$sig <- "Y"
+```
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+ggplot(dat, aes(baseMean, log2FoldChange, col=sig, label=SYMBOL)) + 
+        geom_point() + scale_x_log10() + 
+        geom_hline(yintercept=0, col="grey40") + 
+        scale_color_manual(values=c("grey60", "blue")) +
+        geom_point(data=tab, shape=1, size=5, show.legend=FALSE) + 
+        geom_label_repel(data=tab,
+                         nudge_x = 1,
+                         nudge_y = 2* sign(tab$log2FoldChange),
+                         show.legend=FALSE)
+```
+
+```{r}
+library(IHW)
+res.ihw <- results(dds, name="lineOCT4.conditiontrt", filterFun=ihw)
+summary(res.ihw)
+```
+
+```{r}
+ihw.obj <- metadata(res.ihw)$ihwResult
+plot(ihw.obj)
+```
+
+```{r}
+table(res$padj < .05, IHW=res.ihw$padj < .05)
+```

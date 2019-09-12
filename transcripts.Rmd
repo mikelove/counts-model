@@ -4,3 +4,30 @@ Here is some more text
 
 * Uncertainty
 * DTU
+
+```{r}
+dir <- system.file("extdata", package="macrophage")
+list.files(dir)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+coldata <- read_csv(file.path(dir,"coldata.csv"))
+coldata <- coldata %>% 
+  dplyr::select(names, id=sample_id, line=line_id, condition=condition_name) %>%
+  mutate(line=factor(line),
+         condition=factor(condition, levels=c("naive","IFNg","SL1344","IFNg_SL1344")),
+         files=file.path(dir, "quants", names, "quant.sf.gz"))
+```
+
+```{r}
+all(file.exists(coldata$files))
+```
+
+```{r}
+library(tximeta)
+library(SummarizedExperiment)
+se <- tximeta(coldata, dropInfReps=TRUE)
+```
+

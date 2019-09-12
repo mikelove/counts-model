@@ -15,9 +15,10 @@ list.files(dir)
 library(readr)
 library(dplyr)
 coldata <- read_csv(file.path(dir,"coldata.csv"))
-coldata <- coldata %>% mutate(line=factor(line, levels=c("OCT4","BRG1")),
-                              condition=factor(condition, levels=c("untrt","trt")),
-                              files=file.path(dir, "quants", names, "quant.sf.gz"))
+coldata <- coldata %>% 
+  mutate(line=factor(line, levels=c("OCT4","BRG1")),
+         condition=factor(condition, levels=c("untrt","trt")),
+         files=file.path(dir, "quants", names, "quant.sf.gz"))
 ```
 
 ```{r}
@@ -46,3 +47,7 @@ gse[gse %over% x, ]
 gse[, gse$line == "OCT4"]
 ```
 
+```{r}
+library(org.Mm.eg.db)
+gse <- addIds(gse, "SYMBOL", gene=TRUE)
+```
