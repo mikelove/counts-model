@@ -5,5 +5,6 @@ language:
     chapter_name: "Chapter "
 rmd_files: ["index.Rmd", "quantification.Rmd", 
             "model.Rmd", "transcripts.Rmd", 
-            "downstream.Rmd", "limits.Rmd"]
+            "downstream.Rmd", "limits.Rmd",
+            "session.Rmd", "references.Rmd"]
 output_dir: "docs"

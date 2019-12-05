@@ -5,12 +5,12 @@ Here is some more text
 * Uncertainty
 * DTU
 
-```{r}
+```{r sysdir2}
 dir <- system.file("extdata", package="macrophage")
 list.files(dir)
 ```
 
-```{r}
+```{r coldata2}
 library(readr)
 library(dplyr)
 coldata <- read_csv(file.path(dir,"coldata.csv"))
@@ -21,13 +21,51 @@ coldata <- coldata %>%
          files=file.path(dir, "quants", names, "quant.sf.gz"))
 ```
 
-```{r}
+```{r filter}
+coldata <- coldata %>% filter(condition %in% c("naive","IFNg"))
+coldata$condition <- droplevels(coldata$condition)
+```
+
+```{r file-exists2}
 all(file.exists(coldata$files))
 ```
 
-```{r}
+```{r tximeta2, cache=TRUE}
 library(tximeta)
-library(SummarizedExperiment)
-se <- tximeta(coldata, dropInfReps=TRUE)
+suppressPackageStartupMessages(library(SummarizedExperiment))
+y <- tximeta(coldata)
 ```
 
+```{r sub-y}
+y <- y[seqnames(y) == "chr1",]
+```
+
+```{r fishpond-scale-label}
+library(fishpond)
+y <- scaleInfReps(y, quiet=TRUE)
+y <- labelKeep(y)
+y <- y[mcols(y)$keep,]
+```
+
+```{r swish}
+set.seed(1)
+y <- swish(y, x="condition", pair="line", quiet=TRUE)
+```
+
+```{r swish-sig}
+names(mcols(y))
+table(mcols(y)$qvalue < .05)
+```
+
+```{r swish-hist}
+hist(mcols(y)$pvalue, col="grey")
+```
+
+```{r swish-ma}
+plotMASwish(y, alpha=.05)
+```
+
+```{r swish-counts}
+idx <- with(mcols(y), which(pvalue < .05 & log2FC > 4))
+plotInfReps(y, idx[1], x="condition", cov="line", xaxis=FALSE)
+```

@@ -1,17 +1,17 @@
-# Count models {#model}
+# Counts modeling {#model}
 
 Here is some more text
 
 * Counts, sequencing depth, precision
 * Marginal testing, multiple correction, IHW
 
-```{r}
+```{r colsums}
 assayNames(gse)
 cs <- colSums(assay(gse, "counts"))
 hist(cs/1e6, col="grey", border="white")
 ```
 
-```{r}
+```{r make-prob}
 colData(gse)
 cts <- assay(gse, "counts")[,c(1,4)]
 idx <- rowSums(cts >= 5) == 2
@@ -19,19 +19,19 @@ cts <- cts[idx,]
 p <- sweep(cts, 2, colSums(cts), "/")
 ```
 
-```{r}
+```{r maplot}
 library(rafalib)
 maplot(log10(p[,1]), log10(p[,2]), n=nrow(p), 
        cex=.3, col=rgb(0,0,0,.2))
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
-```{r}
+```{r mean-prob}
 mean.log.p <- rowMeans(log10(p))
 hist(mean.log.p,  col="grey", border="white")
 ```
 
-```{r}
+```{r maplot2}
 library(rafalib)
 maplot(log10(p[,1]), log10(p[,2]), n=nrow(p),
        xlim=c(-6.5, -3.5), ylim=c(-2,2),
@@ -39,7 +39,7 @@ maplot(log10(p[,1]), log10(p[,2]), n=nrow(p),
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
-```{r}
+```{r lfc-hist}
 lfc <- log2(p[,2]) - log2(p[,1])
 hist(lfc[between(mean.log.p, -6, -4)], 
      breaks=seq(-10,10,by=.1),
@@ -47,7 +47,7 @@ hist(lfc[between(mean.log.p, -6, -4)],
      col="grey50", border="white")
 ```
 
-```{r}
+```{r sim-maplot}
 sim.cts <- matrix(rpois(nrow(p) * 2, 30e6 * p[,1]), ncol=2)
 colSums(sim.cts)
 idx <- rowSums(sim.cts >= 5) == 2
@@ -58,7 +58,7 @@ maplot(log10(sim.p[,1]), log10(sim.p[,2]), n=nrow(p),
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
-```{r}
+```{r make-dds}
 library(DESeq2)
 dds <- DESeqDataSet(gse, ~line + line:condition)
 keep <- rowSums(counts(dds) >= 10) >= 3
@@ -66,38 +66,43 @@ table(keep)
 dds <- dds[keep,]
 ```
 
-```{r}
+```{r deseq, cache=TRUE}
 dds <- DESeq(dds)
 ```
 
-```{r}
+```{r disp-ests}
 plotDispEsts(dds, ylim=c(1e-3, .5), xlim=c(5,1e5))
 ```
 
-```{r}
+```{r pca}
+vsd <- vst(dds, blind=FALSE)
+plotPCA(vsd, intgroup=c("line","condition"))
+```
+
+```{r results}
 resultsNames(dds)
 res <- results(dds, name="lineOCT4.conditiontrt")
 summary(res)
 ```
 
-```{r}
+```{r apeglm, cache=TRUE}
 library(apeglm)
 lfc <- lfcShrink(dds, coef="lineOCT4.conditiontrt", type="apeglm")
 ```
 
 
-```{r}
+```{r ma-shrink}
 plotMA(res, ylim=c(-4,4), 
        colNonSig="grey60", colSig="blue", colLine="grey40")
 ```
 
-```{r}
+```{r ma-shrinkn2}
 plotMA(lfc, ylim=c(-4,4), 
        colNonSig="grey60", colSig="blue", colLine="grey40")
 ```
 
 
-```{r}
+```{r symbols}
 lfc$SYMBOL <- mcols(dds)$SYMBOL
 tab <- lfc %>% as.data.frame %>%
         filter(between(baseMean, 1e4, 1e5), 
@@ -105,7 +110,7 @@ tab <- lfc %>% as.data.frame %>%
 tab <- tab[complete.cases(tab),]
 ```
 
-```{r}
+```{r ma-symbols}
 plotMA(lfc, ylim=c(-4,4),
        colNonSig="grey60", colSig="blue", colLine="grey40")
 with(tab, {
@@ -114,14 +119,14 @@ with(tab, {
 })
 ```
 
-```{r}
+```{r signif}
 dat <- as.data.frame(lfc)
 dat <- dat[complete.cases(dat),]
 dat <- dat %>% mutate(sig = ifelse(padj < .1, "Y", "N"))
 tab$sig <- "Y"
 ```
 
-```{r}
+```{r ma-repel}
 library(ggplot2)
 library(ggrepel)
 ggplot(dat, aes(baseMean, log2FoldChange, col=sig, label=SYMBOL)) + 
@@ -135,17 +140,17 @@ ggplot(dat, aes(baseMean, log2FoldChange, col=sig, label=SYMBOL)) +
                          show.legend=FALSE)
 ```
 
-```{r}
+```{r ihw, cache=TRUE}
 library(IHW)
 res.ihw <- results(dds, name="lineOCT4.conditiontrt", filterFun=ihw)
 summary(res.ihw)
 ```
 
-```{r}
+```{r ihw-obj}
 ihw.obj <- metadata(res.ihw)$ihwResult
 plot(ihw.obj)
 ```
 
-```{r}
+```{r compare-fdr}
 table(res$padj < .05, IHW=res.ihw$padj < .05)
 ```

@@ -1,0 +1,5 @@
+# Session information {#session}
+
+```{r sess-info}
+sessionInfo()
+```

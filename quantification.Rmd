@@ -1,17 +1,17 @@
 # Quantification {#quantification}
 
-Here is some more text
+The first step in 
 
-* Salmon
-* tximeta
-* Alevin
+* Salmon [@Patro2017]
+* tximeta [@Love2019]
+* Alevin [@Srivastava2019]
 
-```{r}
+```{r sysdir}
 dir <- system.file("extdata", package="oct4")
 list.files(dir)
 ```
 
-```{r}
+```{r coldata}
 library(readr)
 library(dplyr)
 coldata <- read_csv(file.path(dir,"coldata.csv"))
@@ -21,33 +21,33 @@ coldata <- coldata %>%
          files=file.path(dir, "quants", names, "quant.sf.gz"))
 ```
 
-```{r}
+```{r file-exists}
 all(file.exists(coldata$files))
 ```
 
-```{r}
+```{r tximeta, cache=TRUE}
 library(tximeta)
-library(SummarizedExperiment)
+suppressPackageStartupMessages(library(SummarizedExperiment))
 se <- tximeta(coldata, dropInfReps=TRUE)
 ```
 
-```{r}
+```{r look-se}
 assayNames(se)
 rowRanges(se)
 ```
 
-```{r}
+```{r summarize, cache=TRUE}
 gse <- summarizeToGene(se)
 ```
 
-```{r}
+```{r ranges}
 rowRanges(gse)
 x <- GRanges("chr1", IRanges(10e6, 11e6))
 gse[gse %over% x, ]
 gse[, gse$line == "OCT4"]
 ```
 
-```{r}
+```{r addids}
 library(org.Mm.eg.db)
 gse <- addIds(gse, "SYMBOL", gene=TRUE)
 ```

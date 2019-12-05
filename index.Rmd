@@ -7,9 +7,29 @@ documentclass: book
 bibliography: book.bib
 biblio-style: apalike
 link-citations: yes
-description: "This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook."
+description: "This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor."
 ---
 
-# About this book {-}
+# About this online book {-}
 
-here is some text
+This online book is a chapter of a physical book about RNA Bioinformatics.
+
+Here I will describe how count data, as often arises in RNA sequencing (RNA-seq) 
+experiments, can be modeled using count distributions, as well as how 
+nonparametric methods can be used to analyze count data. The book will 
+cover basic routines for performing data input, normalization, 
+visualization, and statistical testing to determine sets of features
+where the counts reflect differences in expression across samples.
+The final sections will cover downstream analyses that can be performed,
+as well as limitations of the methods presented and extensions.
+
+The code in this book includes the basic routines that can be found
+in software vignettes of various Bioconductor packages, including
+[tximeta](https://bioconductor.org/packages/tximeta), 
+[DESeq2](https://bioconductor.org/packages/DESeq2), and 
+[fishpond](https://bioconductor.org/packages/fishpond). 
+Please see those package vignettes for further details. Any specific 
+questions about Bioconductor software should be posted to the 
+Bioconductor support site:
+
+<https://support.bioconductor.org>
