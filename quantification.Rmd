@@ -1,15 +1,62 @@
 # Quantification {#quantification}
 
-The first step in 
+One key initial step in analyzing RNA-seq data is to quantify,
+or estimate, the number of fragments in the experiment that 
+can be assigned to each feature, whether a gene or a transcript
+(an isoform of a gene). Alongside quantification, it is strongly
+recommended to perform quality control (QC) checks on the sequence
+files. Reports spanning multiple samples can be generated with 
+the [MultiQC](https://multiqc.info/) software [@Ewels2016]. Here 
+we will not start with quality control checks, but instead move 
+straight to quantification and import of estimated counts into R,
+although an example quality control report can be found in the 
+*airway2* package on GitHub: 
+[MultiQC report](https://github.com/mikelove/airway2/blob/master/inst/extdata/multiqc_report.html)
 
-* Salmon [@Patro2017]
-* tximeta [@Love2019]
-* Alevin [@Srivastava2019]
+The data we will examine first in this section is from an experiment
+of the effect of knocking down OCT4 and BRG1 in mouse embryos [@King2017].
+In particular, we will examine the treatment effect of knocking down OCT4.
+The experiment had four groups of samples, each replicated in triplicate.
+All 12 samples from the experiment were re-quantified using the *Salmon*
+software for estimating transcript abundance [@Patro2017]. For details
+about the Salmon method, refer to the 
+[Salmon website](https://combine-lab.github.io/salmon/).
+The jobs for processing the reads with Salmon were executed via 
+Snakemake [@Koster2012]. The exact lines of code can be seen in the
+[Snakefile](https://github.com/mikelove/oct4/blob/master/inst/scripts/Snakefile).
+
+Most of the packages shown in this online book live within the Bioconductor
+project [@Huber2015]. Bioconductor objects are more complex than
+basic objects in R, for example *numberic*, *character*, or other 
+simple objects, in that they often have attached metadata, such as
+additional information about rows and columns, or other metadata.
+We will see how to make use of the metadata throughout the various
+sections by examining, e.g. `colData` for information about the columns
+of a matrix, or `mcols` for metadata columns.
+
+We begin by loading some data in the Bioconductor package *oct4*.
+Note that this step is not useful for a typical RNA-seq workflow,
+as the data will not be contained in an R package, but contained
+in some directory on a server or compute cluster. So in lieu
+of the `system.file` command below, which is used here to locate
+a file within an R package, you could just specify the `dir` 
+variable to be a path to the files, e.g. `/path/to/data/dir`.
 
 ```{r sysdir}
 dir <- system.file("extdata", package="oct4")
 list.files(dir)
 ```
+
+We will use the *readr* and *dplyr* packages to read in a CSV
+file with information about the samples. Because we are typically
+working with tall count matrices, with the rows representing
+genomic features such as genes or transcripts, and columns 
+representing samples, the sample information is referred to
+as the column data or `coldata`.
+
+We set the `levels` of the `line` and `condition` factor variables
+so that `OCT4` and `untrt` are the reference levels.
+
 
 ```{r coldata}
 library(readr)
@@ -24,6 +71,9 @@ coldata <- coldata %>%
 ```{r file-exists}
 all(file.exists(coldata$files))
 ```
+
+* tximeta [@Love2019]
+* Alevin [@Srivastava2019]
 
 ```{r tximeta, cache=TRUE}
 library(tximeta)
