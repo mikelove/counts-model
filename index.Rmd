@@ -28,8 +28,17 @@ in software vignettes of various Bioconductor packages, including
 [tximeta](https://bioconductor.org/packages/tximeta), 
 [DESeq2](https://bioconductor.org/packages/DESeq2), and 
 [fishpond](https://bioconductor.org/packages/fishpond). 
-Please see those package vignettes for further details. Any specific 
-questions about Bioconductor software should be posted to the 
-Bioconductor support site:
+Please see those package vignettes for further details. 
+Any specific questions about Bioconductor software should be posted 
+to the Bioconductor support site:
 
-<https://support.bioconductor.org>
+* <https://support.bioconductor.org>
+
+There are also two published workflows that are related to the 
+analysis steps and packages described here, but which explore 
+different directions. These workflows are hosted on the Bioconductor
+workflow site, and checked regularly to ensure they build correctly 
+and without error:
+
+* [rnaseqGene](https://bioconductor.org/packages/rnaseqGene) - gene-level exploratory analysis and differential expression [@Love2015]
+* [rnaseqDTU](https://bioconductor.org/packages/rnaseqDTU) - differential transcript usage [@Love2018]
