@@ -1,6 +1,16 @@
 # Counts modeling {#model}
 
-Here is some more text
+In this section, I will discuss the statistical models that are
+often used to analyze RNA-seq data, in particular gene-level count
+matrices. I will then use the *DESeq2* package to calculate
+scaling factors, estimate biological dispersion within groups of
+samples, and perform differential testing per gene [@Love2014].
+
+Some other popular Bioconductor packages for RNA-seq analysis include the 
+*edgeR* package [@Robinson2010,@McCarthy2012] and the *limma-voom*
+method in the *limma* package [@Law2014]. The approach taken by
+*DESeq2* for estimation of dispersion is similar to the method
+proposed by @Wu2012 in the *DSS* Bioconductor package.
 
 * Counts, sequencing depth, precision
 * Marginal testing, multiple correction, IHW

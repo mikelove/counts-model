@@ -7,18 +7,18 @@ can be assigned to each feature, whether a gene or a transcript
 recommended to perform quality control (QC) checks on the sequence
 files. Reports spanning multiple samples can be generated with 
 the [MultiQC](https://multiqc.info/) software [@Ewels2016]. Here 
-we will not start with quality control checks, but instead move 
+I will not start with quality control checks, but instead move 
 straight to quantification and import of estimated counts into R,
 although an example quality control report can be found in the 
 *airway2* package on GitHub: 
 [MultiQC report](https://github.com/mikelove/airway2/blob/master/inst/extdata/multiqc_report.html).
 
-The data we will examine first in this section is from an experiment
+The data I will examine first in this section is from an experiment
 of the effect of knocking down OCT4 and BRG1 in mouse embryos [@King2017].
-In particular, we will examine the treatment effect of knocking down OCT4.
+In particular, I will examine the treatment effect of knocking down OCT4.
 The experiment had four groups of samples, each replicated in triplicate.
 
-We will use the *Salmon* software for estimating transcript abundance [@Patro2017].
+I will use the *Salmon* software for estimating transcript abundance [@Patro2017].
 Briefly, *Salmon* uses the sequenced reads and the reference transcripts,
 and constructs a generative model for the observed data, which includes
 modeling of various technical biases that are commonly observed in RNA-seq.
@@ -45,7 +45,7 @@ We will see how to make use of the metadata throughout the various
 sections by examining, e.g. `colData` for information about the columns
 of a matrix, or `mcols` for metadata columns.
 
-We begin by loading some data in the Bioconductor package *oct4*.
+I begin by loading some data in the Bioconductor package *oct4*.
 Note that this step is not useful for a typical RNA-seq workflow,
 as the data will not be contained in an R package, but contained
 in some directory on a server or compute cluster. So in lieu
@@ -58,7 +58,7 @@ dir <- system.file("extdata", package="oct4")
 list.files(dir)
 ```
 
-We will use the *readr* and *dplyr* packages to read in a CSV
+I will use the *readr* and *dplyr* packages to read in a CSV
 file with information about the samples. Because we are typically
 working with tall count matrices, with the rows representing
 genomic features such as genes or transcripts, and columns 
@@ -73,14 +73,14 @@ library(readr)
 coldata <- read_csv(file.path(dir,"coldata.csv"))
 ```
 
-We next set the `levels` of the `line` and `condition` factor variables
-so that `OCT4` and `untrt` are the reference levels, and we specify
-the path to the quantification files we want to read in.
+I next set the `levels` of the `line` and `condition` factor variables
+so that `OCT4` and `untrt` are the reference levels, and I specify
+the path to the quantification files I want to read in.
 
-In the last step of the `mutate` call, note we specify paths to the
+In the last step of the `mutate` call, note I specify paths to the
 quantification files `quant.sf.gz`. Typically, these files are not
-gzipped, but we have compressed the `quant.sf` files to reduce the 
-size of the data package. Note also that, although we point only to the
+gzipped, but I have compressed the `quant.sf` files to reduce the 
+size of the data package. Note also that, although I point only to the
 `quant.sf` files, the entire directory containing that file
 is required for proper import of the quantification data. 
 There are other metadata files that provide important information a
@@ -97,14 +97,14 @@ coldata <- coldata %>%
          files=file.path(dir, "quants", names, "quant.sf.gz"))
 ```
 
-All the files exist at the locations we specified, which in this case
+All the files exist at the locations I specified, which in this case
 have the pattern `/<DIR>/quants/<NAMES>/quant.sf.gz`.
 
 ```{r file-exists}
 all(file.exists(coldata$files))
 ```
 
-We will now use the Bioconductor package *tximeta* [@Love2019] to 
+I will now use the Bioconductor package *tximeta* [@Love2019] to 
 read in the quantification data, and create a *SummarizedExperiment*
 object. The *SummarizedExperiment* object is described in @Huber2015,
 in particular diagrammed in 
@@ -120,9 +120,9 @@ when processing bulk RNA-seq with *Salmon*, or when processing single
 cell RNA-seq with the *alevin* software [@Srivastava2019]
 (distributed with *Salmon*).
 
-A small note: we specify `dropInfReps=TRUE`, because we will be
-performing gene-level analysis, and we won't make use of the
-uncertainty information in this first analysis. We will show 
+A small note: I specify `dropInfReps=TRUE`, because I will be
+performing gene-level analysis, and I won't make use of the
+uncertainty information in this first analysis. I will show 
 in a later section how to make use of the inferential replicates
 computed by *Salmon* during quantification.
 
@@ -149,8 +149,8 @@ rowRanges(se)
 Because the `tximeta` function has identified the correct 
 reference transcripts that were used for quantification,
 and stored this as metadata in the *SummarizedExperiment* 
-object, we can obtain additional information, such as the 
-mapping of transcripts to genes. We can then perform a summarization
+object, I can obtain additional information, such as the 
+mapping of transcripts to genes. I can then perform a summarization
 task, without having to look up this mapping manually.
 
 ```{r summarize, cache=TRUE}
@@ -165,9 +165,9 @@ provides similar functionality to *tximeta*, but instead of
 returning a rich Bioconductor object, *tximport* returns
 a simple list of matrices.
 
-Below we show some examples of operations that can be easily
-performed because we have a *SummarizedExperiment* object
-with the appropriate gene ranges attached. We can easily
+Below I show some examples of operations that can be easily
+performed because I have a *SummarizedExperiment* object
+with the appropriate gene ranges attached. I can easily
 subset the genes (rows) based on overlaps with a given genomic range 
 using standard square bracket indexing. The range-based
 class system and set of methods for operating on genomic ranges
@@ -180,7 +180,7 @@ x <- GRanges("chr1", IRanges(10e6, 11e6))
 gse[gse %over% x, ]
 ```
 
-We can likewise easily subset the samples by referring to 
+I can likewise easily subset the samples by referring to 
 the `colData` columns, e.g. `colData(gse)$line`. 
 A shortcut for referring to `colData` columns is to just use 
 the dollar sign directly on the object, `gse$line`.
@@ -189,9 +189,9 @@ the dollar sign directly on the object, `gse$line`.
 gse[, gse$line == "OCT4"]
 ```
 
-Finally, we demonstrate that it is easily to add alternative
+Finally, I demonstrate that it is easily to add alternative
 identifiers, making use of the organism annotation packages
-in Bioconductor. For example, to add gene symbols, we can 
+in Bioconductor. For example, to add gene symbols, I can 
 use *tximeta*'s `addIds` function, and specify the `SYMBOL`
 column. 
 
