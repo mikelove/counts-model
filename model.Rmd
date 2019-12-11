@@ -12,14 +12,35 @@ method in the *limma* package [@Law2014]. The approach taken by
 *DESeq2* for estimation of dispersion is similar to the method
 proposed by @Wu2012 in the *DSS* Bioconductor package.
 
-* Counts, sequencing depth, precision
-* Marginal testing, multiple correction, IHW
+I will begin by investigating the estimated counts that were imported
+from the *Salmon* software, and comparing these counts across and
+within samples. I will note the varying precision that the counts
+offer for log ratio comparisons between samples. Finally, I will
+perform per-gene testing for differential expression using the
+*DESeq2* package, and multiple test correction, including the *IHW*
+method [@Ignatiadis2016].
+
+First, it's useful to explore the varying number of fragments (pairs
+of reads) that have been assigned to the genes for each sample. For a
+typical mammalian RNA-seq experiment, we might expect tens of millions
+of fragments per sample, which are distributed across tens of
+thousands of genes, although there is inevitably a range of sequencing
+depth for each sample:
 
 ```{r colsums}
 assayNames(gse)
 cs <- colSums(assay(gse, "counts"))
 hist(cs/1e6, col="grey", border="white")
 ```
+
+Let us first consider just two samples, one from OCT4 untreated group
+and one from the OCT4 treated group. I will make a plot examining the
+proportion of the total count for each gene. I will first subset to
+only those genes where both samples have a count of 5 or more, to cut
+down on the number of points to plot. Here we use the total count,
+`colSums(cts)` to divide the counts for each sample, while later we
+will discuss a robust estimator for sequencing depth variation across
+samples.
 
 ```{r make-prob}
 colData(gse)
@@ -29,12 +50,39 @@ cts <- cts[idx,]
 p <- sweep(cts, 2, colSums(cts), "/")
 ```
 
+We can examine the ratio of the proportions for each gene, over the
+geometric mean, using the `maplot` function from the *rafalib*
+package. We will plot the ratio and the geometric mean of proportions
+both on the log scale. `maplot` is a basic function for making an
+"MA-plot" which has been used in transcriptomics since at least the
+early 2000s when it was used for microarray datasets [@Dudoit2002;
+@Roberts2000]. Later I will show a specialized MA-plot function for
+RNA-seq data in *DESeq2*.
+
 ```{r maplot}
 library(rafalib)
 maplot(log10(p[,1]), log10(p[,2]), n=nrow(p), 
        cex=.3, col=rgb(0,0,0,.2))
 abline(h=0, col=rgb(0,0,1,.5))
 ```
+
+The red line is a smooth curve through the log ratios 
+(here $\log_{10}$, although we will later switch to $\log_2$ for the
+ratios). Note that the line is relatively flat across many orders of
+magnitude of the proportion. So whether the gene has 1 millionth of
+the total count (-6) or up to one thousandth of the total count (-3),
+the ratio between the two samples tends to fluctuate around 0, with
+most of the points somewhere between -0.1 and 0.1. The points further
+off the horizontal line may indicate differentially expressed genes,
+but we will better identify these using all of the replicates.
+
+While just considering the two samples, I can also examine the
+histogram of the x-axis above, the mean of the $\log_{10}$ proportions
+(or equivalently the $\log_{10}$ of the geometric mean of
+proportions). We see that most genes that we are considering fall in
+the range from 1/10,000,000 (-7) to 1/10,000 (-4) of the total
+count. That these ratios are very low is relevant for the choice of
+statistical distribution.
 
 ```{r mean-prob}
 mean.log.p <- rowMeans(log10(p))
@@ -49,6 +97,19 @@ maplot(log10(p[,1]), log10(p[,2]), n=nrow(p),
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
+I will zoom out on the y-axis and zoom in on the x-axis on the MA-plot
+to emphasize that for the range where most of the genes are, there is
+actually not much variation in the ratio of proportions across the
+treatment. 
+
+$10$ is not a great base for the logarithm, because it's extreme to
+have a 10 fold change, and then it becomes hard to interpret the
+meaningful changes in the range from 0 to 1. Much better is to use
+$\log_2$, as we can easily interpret 1 as doubling, 2 as quadrupling,
+etc. Now I calculate the $\log_2$ ratio of proportions and plot the
+histogram of these log ratios, when the log10 mean proportion is
+between -6 and -4:
+
 ```{r lfc-hist}
 lfc <- log2(p[,2]) - log2(p[,1])
 hist(lfc[between(mean.log.p, -6, -4)], 
@@ -56,6 +117,11 @@ hist(lfc[between(mean.log.p, -6, -4)],
      xlim=c(-5,5),
      col="grey50", border="white")
 ```
+
+Again we see that it's rare for there to be an extreme change (more
+than doubling) comparing these two samples from different treatment
+groups. Most of the genes fall around 0. Exactly 0 implies no change
+in the proportion as calculated using the total count.
 
 ```{r sim-maplot}
 sim.cts <- matrix(rpois(nrow(p) * 2, 30e6 * p[,1]), ncol=2)
