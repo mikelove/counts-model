@@ -37,10 +37,19 @@ Let us first consider just two samples, one from OCT4 untreated group
 and one from the OCT4 treated group. I will make a plot examining the
 proportion of the total count for each gene. I will first subset to
 only those genes where both samples have a count of 5 or more, to cut
-down on the number of points to plot. Here we use the total count,
+down on the number of points to plot. Here I use the total count,
 `colSums(cts)` to divide the counts for each sample, while later we
 will discuss a robust estimator for sequencing depth variation across
 samples.
+
+Before I create the proportions, it's important to remember that,
+because genes with longer transcripts will produce more cDNA
+fragments, the proportion estimated here (without taking into account
+the length of the feature) does not estimate the proportion of
+*molecules*. The `abundance` assay of the `gse` object contains
+estimates of the molecules, in transcripts per million (TPM). For more
+on how these estimates are computed, consult the *Salmon* methods
+paper [@Patro2017].
 
 ```{r make-prob}
 colData(gse)
@@ -123,6 +132,18 @@ than doubling) comparing these two samples from different treatment
 groups. Most of the genes fall around 0. Exactly 0 implies no change
 in the proportion as calculated using the total count.
 
+Before we begin modeling the counts from the RNA-seq experiment, I
+produce one more plot to give a sense of expected sampling variation
+with counts of a similar distribution to the ones we
+observed. Supposing that the proportions `p` was fixed for the first
+sample, and we draw 30,000,000 fragments, we will obtain a multinomial
+distribution. When the number of observations is large, and the
+proportions are small, the count for any given gene is well
+approximated by a Poisson distribution. So I will create two simulated
+technical replicate samples, by creating two draws from a Poisson
+distribution along the genes. I think repeat the same code as above,
+to examine the MA-plot for the simulated counts.
+
 ```{r sim-maplot}
 sim.cts <- matrix(rpois(nrow(p) * 2, 30e6 * p[,1]), ncol=2)
 colSums(sim.cts)
@@ -133,6 +154,10 @@ maplot(log10(sim.p[,1]), log10(sim.p[,2]), n=nrow(p),
        cex=.3, col=rgb(0,0,0,.2))
 abline(h=0, col=rgb(0,0,1,.5))
 ```
+
+Note that, even after filtering out genes that do not have a count of
+5 or more for both samples, there is still substantial inflation of
+the ratio of proportions for the small count genes.
 
 ```{r make-dds}
 library(DESeq2)
