@@ -20,8 +20,8 @@ nonparametric methods can be used to analyze count data. The book will
 cover basic routines for performing data input, scaling/normalization, 
 visualization, and statistical testing to determine sets of features
 where the counts reflect differences in expression across samples.
-The final sections will cover downstream analyses that can be performed,
-as well as limitations of the methods presented and extensions.
+The final section will cover limitations of the methods presented and
+extensions.
 
 The code in this book includes the basic routines that can be found
 in software vignettes of various Bioconductor packages, including

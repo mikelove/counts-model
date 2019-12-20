@@ -1,5 +1,7 @@
 # Counts modeling {#model}
 
+## A first exploration of counts
+
 In this section, I will discuss the statistical models that are
 often used to analyze RNA-seq data, in particular gene-level count
 matrices. I will then use the *DESeq2* package to calculate
@@ -18,7 +20,10 @@ within samples. I will note the varying precision that the counts
 offer for log ratio comparisons between samples. Finally, I will
 perform per-gene testing for differential expression using the
 *DESeq2* package, and multiple test correction, including the *IHW*
-method [@Ignatiadis2016].
+method [@Ignatiadis2016]. Note that the first section of this chapter
+includes code and plots that are not typically performed during
+RNA-seq analysis, but mostly for introducing the reader to some basic
+properties of RNA-seq count matrices.
 
 First, it's useful to explore the varying number of fragments (pairs
 of reads) that have been assigned to the genes for each sample. For a
@@ -136,12 +141,13 @@ Before we begin modeling the counts from the RNA-seq experiment, I
 produce one more plot to give a sense of expected sampling variation
 with counts of a similar distribution to the ones we
 observed. Supposing that the proportions `p` was fixed for the first
-sample, and we draw 30,000,000 fragments, we will obtain a multinomial
-distribution. When the number of observations is large, and the
+sample, and we draw 30,000,000 fragments according to these gene-wise
+proportions. We would then obtain a multinomial distribution for the
+counts per gene. When the number of observations is large, and the
 proportions are small, the count for any given gene is well
 approximated by a Poisson distribution. So I will create two simulated
-technical replicate samples, by creating two draws from a Poisson
-distribution along the genes. I think repeat the same code as above,
+*technical replicate* samples, by creating two draws from a Poisson
+distribution along the genes. I then repeat the same code as above,
 to examine the MA-plot for the simulated counts.
 
 ```{r sim-maplot}
@@ -159,17 +165,59 @@ Note that, even after filtering out genes that do not have a count of
 5 or more for both samples, there is still substantial inflation of
 the ratio of proportions for the small count genes.
 
+## Modeling counts with DESeq2
+
+I will now demonstrate the use of the *DESeq2* package for estimating
+per-sample scaling factors, per-gene dispersion and fold changes per
+gene across the samples. As in *edgeR* and *limma*, *DESeq2* allows
+for the use of complex designs, leveraging R's *formula* syntax. For
+details about various design formula, first consult the *DESeq2*
+vignette and `?results` help page.
+
+I create a *DESeqDataSet* object, by providing the gene-level
+*SummarizedExperiment* object, and specifying the `design`, which is a
+formula expressing how we wish to model the counts. Here, we specify a
+baseline term for each `line` (OCT4 or BRG1), and a condition effect
+specific to each line (so comparing treated vs untreated, specific to
+each line). The colon between `line` and `condition` specifies to form
+an interaction between those two terms.
+
 ```{r make-dds}
 library(DESeq2)
-dds <- DESeqDataSet(gse, ~line + line:condition)
+dds <- DESeqDataSet(gse, design=~line + line:condition)
+```
+
+After creating the dataset, we perform some minimal filtering that
+makes sense for bulk RNA-seq. We insist that there be at least three
+samples with a count of 10 or more to keep the gene in the
+dataset. This will reduce the size of the dataset (here, removing more
+than half of the genes) and the time needed to fit various per-gene
+parameters, such as dispersion and fold change estimates.
+
+```{r filter-dds}
 keep <- rowSums(counts(dds) >= 10) >= 3
 table(keep)
 dds <- dds[keep,]
 ```
 
+The parameters are estimated with a single call to the `DESeq`
+function. For details on all the steps performed by this function,
+check the help page `?DESeq`, as well as a section of the vignette
+called, ``The DESeq2 model''.
+
 ```{r deseq, cache=TRUE}
 dds <- DESeq(dds)
 ```
+
+One of the key estimates is the dispersion for each gene. Here I plot
+the estimates over the mean of normalized counts for each gene.  There
+are two per-gene estimates, an initial estimate which looks only at
+the data for a single gene (`gene-est`, black points), and a final
+estimate that incorporates information from each gene, as well as
+sharing information across genes (`final`, blue points). The blue
+circles at the top of the plot represent genes with high dispersion
+relative to the rest of the dataset, and in these cases, only the
+`gene-est` estimate is used, without information from other genes.
 
 ```{r disp-ests}
 plotDispEsts(dds, ylim=c(1e-3, .5), xlim=c(5,1e5))

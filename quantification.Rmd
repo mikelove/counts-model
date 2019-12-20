@@ -69,7 +69,6 @@ dplyr, see the excellent
 
 ```{r coldata}
 library(readr)
-
 coldata <- read_csv(file.path(dir,"coldata.csv"))
 ```
 
@@ -126,8 +125,11 @@ uncertainty information in this first analysis. I will show
 in a later section how to make use of the inferential replicates
 computed by *Salmon* during quantification.
 
-```{r tximeta, cache=TRUE}
+```{r}
 library(tximeta)
+```
+
+```{r tximeta, cache=TRUE}
 suppressPackageStartupMessages(library(SummarizedExperiment))
 se <- tximeta(coldata, dropInfReps=TRUE)
 ```
@@ -140,6 +142,10 @@ did not document this when uploading to a public repository.
 
 We can see the matrices of data that have been compiled, and 
 examine the genomic locations of the features (rows):
+
+```{r}
+library(SummarizedExperiment)
+```
 
 ```{r look-se}
 assayNames(se)
