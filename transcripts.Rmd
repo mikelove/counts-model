@@ -2,41 +2,109 @@
 
 In the previous chapters, I showed importing transcript-level data
 with *tximeta*, summarizing the data to gene-level counts, and 
-modeling the gene-level counts with *DESeq2*.
+modeling the gene-level counts with *DESeq2*. Now I return to
+transcript-level data and demonstrate how we can perform statistical
+testing on transcripts, that is, across all the isoforms of all the
+genes. There are two important aspects to consider when performing
+transcript-level analysis:
 
-* Uncertainty
-* DTU
+1. Uncertainty - Because the isoforms of a gene often have a
+   considerable amount of sequence similarity resulting from shared
+   exons, and because RNA-seq often involves generating fragments which
+   do not span the entire transcript, there can be considerable
+   uncertainty in assigning a given fragment to a particular
+   transcript. The uncertainty is not constant across the transcripts,
+   and depends on many factors, some inherent to the gene model, such
+   as the size of the alternative exons, and some inherent to the
+   experiment, such as the sequencing depth, fragment length, read
+   length, and technical biases producing non-uniform coverage.
+2. Isoform switching - We may perform testing for differential
+   expression of each transcript (we will perform this analysis in
+   this chapter), or we may also consider testing whether the usage of
+   the isoforms within a gene changes across condition. The latter
+   question is often termed *differential transcript usage* (DTU), and
+   can be related to *differential transcript expression* (DTE), but
+   they are not identical questions. For example, if all of the
+   isoforms of a gene increase in their expression across condition
+   with equal fold change, this is an example of differential gene
+   expression (DGE) and DTE, but not DTU, as the proportions of the
+   individual isoforms did not change.
 
-[@Li2011]
+Regarding isoform switching, one reference which explores Bioconductor
+packages that can be used to detect DTU is the *rnaseqDTU*
+Bioconductor workflow mentioned previously [@Love2018]. This workflow
+demonstrates optimal filtering techniques [@Soneson2016], how the
+methods *DEXSeq* [@Anders2012] and *DRIMSeq* [@Nowicka2016] can be run
+on transcript counts, and how *stageR* [@VanDenBerge2017] can be
+utilized to detect which genes and which isoforms contain evidence of
+DTU while controlling overall error rates.
 
-[@Zhu2019]
+I will first introduce the experimental data, and then discuss various
+approaches used to analyze transcript-level data. I will load some
+processed RNA-seq data from an experiment by @Alasoo2018, a subset of
+which is available in the *macrophage* Biconductor package. The
+experiment involved measuring transcription in macrophage cell lines
+from a number of human donors, both untreated, as well as treated with 
+IFNγ, *Salmonella*, and IFNγ combined with *Salmonella*. Here I will
+focus on the samples that were untreated and treated with IFNγ. As
+each cell line was from a human donor, we will also want to control
+for a baseline donor effect when comparing across treatment.
 
-[@Storey2003]
+The *macrophage* dataset has paired samples from 6 of the donors (all
+female), and has been quantified using *Salmon*. One unique aspect of
+*Salmon* is that it allows for GC bias correction at the fragment
+level during quantification, which is critical for reliable
+identification of the correct expressed isoform in experiments that
+have non-uniform coverage along the transcripts
+[@Love2016Modeling;@Patro2017].
 
-[@Alasoo2018]
+Here I will perform differential transcript expression (DTE)
+analysis. A key aspect, compared to gene-level analysis, is that there
+is much more uncertainty in the assignments of fragments to
+transcripts. A number of statistical methods have been proposed to
+take this measurement uncertainty into account when performing
+downstream testing, including *BitSeq* [@Glaus2012], *mmdiff*
+[@Turro2013], *IsoDE* [@AlSeesi2014], and *Sleuth* [@Pimentel2017],
+which leverages bootstrap quantification estimates from the *kallisto*
+[@Bray2016] quantification method. These methods incorporate
+measurement uncertainty into parametric models for differential
+expression where biological variability is also modeled.  The
+exception is *IsoDE* which compares bootstrap distributions of
+transcript expression for two samples at a time.
 
-[@Love2016Modeling]
-[@Patro2017]
+Here, I will use a nonparametric method that takes into account both
+inferential uncertainty of fragment assignments, as well as biological
+variability across samples, called *Swish* [@Zhu2019], which is
+available in the *fishpond* Bioconductor package. *Swish* stands for
+"SAMseq With Inferential Samples Helps", as it is based on the
+existing method for differential gene expression, *SAMseq* [@Li2011]. 
+The key idea is to make use of nonparametric testing methods such as
+the Mann-Whitney Wilcoxon statistic, which operate only on the ranks
+of the data across samples. The original *SAMseq* method performed
+resampling of the counts in order to deal with library size
+differences. Here, *Swish* will make use of multiple values for the
+count matrix that were computed by the *Salmon* software, using a
+technique called Gibbs sampling. For more details on the Gibbs
+sampling procedure, consult the publication of *Salmon* [@Patro2017]
+and *mmseq* [@Turro2011]. Finally, the false discovery rate of the
+test statistics averaged over the multiple versions of the counts is
+computed via a permutation technique [@Storey2003].
 
-[@Glaus2012]
-[@AlSeesi2014]
-[@Pimentel2017]
-[@Bray2016]
-
-[@Love2018]
-
-[@Nowicka2016]
-
-[@VanDenBerge2017]
-
-[@Soneson2016]
-
-[@Anders2012]
+I begin by locating the files in the *macrophage* package. As before,
+this step is not useful for a typical RNA-seq workflow, as the data
+will not be contained in an R package, but contained in some directory
+on a server or compute cluster. In lieu of the `system.file` command
+below, you should just specify the `dir` variable to be a path to the
+files, e.g. `/path/to/data/dir`.
 
 ```{r sysdir2}
 dir <- system.file("extdata", package="macrophage")
 list.files(dir)
 ```
+
+I then read in the sample table, and use *dplyr* to select certain
+columns, convert columns into factors, and add a new column pointing
+to the quantification files.
 
 ```{r coldata2}
 library(readr)
@@ -49,14 +117,31 @@ coldata <- coldata %>%
          files=file.path(dir, "quants", names, "quant.sf.gz"))
 ```
 
+I will only consider for this demonstration the untreated and IFNγ
+treated samples:
+
 ```{r filter}
 coldata <- coldata %>% filter(condition %in% c("naive","IFNg"))
 coldata$condition <- droplevels(coldata$condition)
 ```
 
+The `coldata` sample table now looks like:
+
+```{r macro-coldata}
+head(coldata)
+```
+
+Test that all the files exist as I specified:
+
 ```{r file-exists2}
 all(file.exists(coldata$files))
 ```
+
+As before, I use *tximeta* to read in the quantification data. This
+time I do not set `dropInfReps=TRUE`, as I will need the inferential
+replicates created by *Salmon* to perform DTE with *Swish*. The
+inferential replicates allows the analysis to take into account the
+uncertainty of fragment assignment to transcripts.
 
 ```{r tximeta2, cache=TRUE}
 library(tximeta)
@@ -64,36 +149,83 @@ suppressPackageStartupMessages(library(SummarizedExperiment))
 y <- tximeta(coldata)
 ```
 
+For speed of the demonstration, I subset to only the transcripts on
+chromosome 1 (this would not be recommended for a typical analysis). 
+
 ```{r sub-y, cache=TRUE}
 y <- y[seqnames(y) == "chr1",]
 ```
 
-```{r fishpond-scale-label}
+I load the *fishpond* package, which contains the methods for running
+*Swish*. There are three basic steps: scaling of the inferential
+replicates to make them comparable despite different library size,
+filtering out lowly expressed transcripts, and the testing itself. The
+scaling method by default uses the median ratio method of *DESeq*
+[@Anders2010]. The `labelKeep` function by default will keep those
+transcripts with 3 or more samples with a count of 10 or higher. For
+scRNA-seq with UMI de-duplication, it is recommended to lower the
+minimal count to a lower value such as 3. The minimal number of
+samples can be increased for experiments with many samples, to
+decrease the number of transcripts considered by the test.
+
+```{r fishpond-scale-label, cache=TRUE}
 library(fishpond)
 y <- scaleInfReps(y, quiet=TRUE)
 y <- labelKeep(y)
 y <- y[mcols(y)$keep,]
 ```
 
+Because the method makes use of permutations, it is required to set a
+seed for computational reproducibility. I specify to test across the
+`condition` variable, while controlling for a pairing variable
+`line`. The `line` variable indicates which donor the cell line came
+from.
+
 ```{r swish, cache=TRUE}
 set.seed(1)
 y <- swish(y, x="condition", pair="line", quiet=TRUE)
 ```
+
+After running `swish`, all of the results are stored in the metadata
+columns (`mcols`) of the object `y`. I look to see how many
+transcripts have a small q-value (analogous to an adjusted p-value,
+this should provide a set with a specified FDR control).
 
 ```{r swish-sig}
 names(mcols(y))
 table(mcols(y)$qvalue < .05)
 ```
 
+One important aspect in testing across many features, in particular
+where the uncertainty level is so heterogeneous, is to consider if the
+p-value distribution is roughly uniform, with the exception of the
+rejected tests. Here *Swish* provides a roughly uniform distribution,
+with a spike on the left side representing the rejections of the null
+hypothesis.
+
 ```{r swish-hist}
 hist(mcols(y)$pvalue, col="grey")
 ```
+
+As with *DESeq2* I can make an MA-plot, with the differential
+transcripts highlighted in blue (here at 5% FDR).
 
 ```{r swish-ma}
 plotMASwish(y, alpha=.05)
 ```
 
+I can also examine individual transcripts with evidence of
+differential expression. As each sample is represented by a
+distribution of possible estimated counts from *Salmon*, *Swish* uses 
+boxplots to represent the differences in expression across samples:
+
 ```{r swish-counts}
 idx <- with(mcols(y), which(pvalue < .05 & log2FC > 4))
 plotInfReps(y, idx[1], x="condition", cov="line", xaxis=FALSE)
 ```
+
+This chapter gives a basic introduction to DTE using nonparametric
+testing with the *Swish* method. For more details on transcript-level
+analysis, it is recommended to consult the *fishpond* Bioconductor
+package vignette, or the *rnaseqDTU* workflow on Bioconductor
+[@Love2018]. 

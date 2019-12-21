@@ -421,8 +421,11 @@ To use *IHW* instead of mean count thresholding, we pass the `ihw`
 function to the `filterFun` argument of `results`. A similar number
 of genes are detected as differentially expressed in this case.
 
+```{r load-ihw}
+suppressPackageStartupMessages(library(IHW))
+```
+
 ```{r ihw, cache=TRUE}
-library(IHW)
 res.ihw <- results(dds, name="lineOCT4.conditiontrt", filterFun=ihw)
 summary(res.ihw)
 ```

@@ -16,7 +16,9 @@ although an example quality control report can be found in the
 The data I will examine first in this section is from an experiment
 of the effect of knocking down OCT4 and BRG1 in mouse embryos [@King2017].
 In particular, I will examine the treatment effect of knocking down OCT4.
-The experiment had four groups of samples, each replicated in triplicate.
+The experiment had four groups of samples, each replicated in
+triplicate. The RNA-seq data from the experiment is available in the
+*oct4* Bioconductor package.
 
 I will use the *Salmon* software for estimating transcript abundance [@Patro2017].
 Briefly, *Salmon* uses the sequenced reads and the reference transcripts,
@@ -129,8 +131,11 @@ computed by *Salmon* during quantification.
 library(tximeta)
 ```
 
-```{r tximeta, cache=TRUE}
+```{r load-se}
 suppressPackageStartupMessages(library(SummarizedExperiment))
+```
+
+```{r tximeta, cache=TRUE}
 se <- tximeta(coldata, dropInfReps=TRUE)
 ```
 
@@ -142,10 +147,6 @@ did not document this when uploading to a public repository.
 
 We can see the matrices of data that have been compiled, and 
 examine the genomic locations of the features (rows):
-
-```{r load-se}
-library(SummarizedExperiment)
-```
 
 ```{r look-se}
 assayNames(se)
