@@ -210,9 +210,13 @@ dds <- DESeq(dds)
 ```
 
 One of the key estimates is the dispersion for each gene. Here I plot
-the estimates over the mean of normalized counts for each gene.  There
-are two per-gene estimates, an initial estimate which looks only at
-the data for a single gene (`gene-est`, black points), and a final
+the estimates over the mean of scaled counts for each gene. Note that
+many of the plots in *DESeq2* refer to "normalized counts"; here this
+just implies scaling the counts by the size factor, so that the 
+library size differences across samples are minimized.
+
+There are two per-gene estimates, an initial estimate which looks only
+at the data for a single gene (`gene-est`, black points), and a final
 estimate that incorporates information from each gene, as well as
 sharing information across genes (`final`, blue points). The blue
 circles at the top of the plot represent genes with high dispersion
@@ -223,10 +227,33 @@ relative to the rest of the dataset, and in these cases, only the
 plotDispEsts(dds, ylim=c(1e-3, .5), xlim=c(5,1e5))
 ```
 
+Below I will continue with per-gene analysis, but first, I demonstrate
+how to examine differences across the most variable genes using a PCA
+plot. Before I compute the principal components, I use the `vst`
+function to compute a variance stabilizing transformation of the count
+data. This is similar to a log2 transform but avoids inflating the
+variance of the low count genes. For more details on the methods used
+here to compute the transformation, consult the *DESeq2* vignette or
+`?vst`. We specify `blind=FALSE` which will use the sample grouping 
+information when calculating the per-gene dispersion. The 
+transformation itself does not use the design, once the global 
+dispersion information has been fit.
+
 ```{r pca}
 vsd <- vst(dds, blind=FALSE)
 plotPCA(vsd, intgroup=c("line","condition"))
 ```
+
+We can see that the primary axis of variation among the most variable
+genes is the cell line difference (OCT4 vs BRG1), and the second
+axis corresponds to treatment differences, though note that these
+are not consistent across cell line.
+
+We can extract various results tables from the `dds` object, based
+on the design. Here I extract a table of results for the effect of 
+condition in the OCT4 line. The `summary` function will provide a 
+summary table across all genes. We observe more than a thousand genes
+up- and down-regulated with response to treatment for this comparison.
 
 ```{r results}
 resultsNames(dds)
@@ -234,22 +261,77 @@ res <- results(dds, name="lineOCT4.conditiontrt")
 summary(res)
 ```
 
+The genes with an adjusted p-value, `padj`, less than a threshold, 
+say 0.1, provide a set that is expected to control a corresponding 
+false discovery rate (FDR), for example no more than 10% of the genes
+in the set should be false positives.
+
+We can look at the top lines of the results table. Note that *DESeq2* 
+does not sort the table, this must be done by the user. The top
+three lines correspond to the first three genes in the dataset unless
+the user performs an ordering operation.
+
+```{r results-show}
+head(res, 3)
+```
+
+For example, ordering adjusted p-values from small to large (but then
+remember that this object is no long aligned with `dds` for example).
+
+```{r results-order}
+res.ord <- res[order(res$padj),]
+```
+
+I will show how to examine the differences across all genes in an 
+MA-plot. But first, I will compute a new estimate of fold change.
+The estimate in the results table is the MLE, or maximum likelihood
+estimate, which is highly variable for low count genes (as we saw
+in the simulated example). Here I compute a Bayesian estimate for the
+fold change using methods in the *apeglm* package [@Zhu2018]. The 
+*apeglm* functions are wrapped up in a *DESeq2* function called
+`lfcShrink`, which produces a table similar to `results` but with 
+shrunken LFC instead of MLE.
+
 ```{r apeglm, cache=TRUE}
 library(apeglm)
 lfc <- lfcShrink(dds, coef="lineOCT4.conditiontrt", type="apeglm")
 ```
 
+We can now examine the differences between the MLE and the Bayesian
+estimate of fold change from *apeglm*. First the MLE:
 
 ```{r ma-shrink}
 plotMA(res, ylim=c(-4,4), 
        colNonSig="grey60", colSig="blue", colLine="grey40")
 ```
 
+The genes passing a 10% FDR threshold are colored in blue. Note the 
+wide variability on the left side of the plot. This is mostly due
+to imprecision in our estimates.
+
+After applying the Bayesian shrinkage procedure, the variability
+due to imprecision on the left side of the plot is reduced. In the 
+paper by @Zhu2018, it is demonstrated that the shrunken LFC are better
+suited for ranking genes by effect size.
+
 ```{r ma-shrinkn2}
 plotMA(lfc, ylim=c(-4,4), 
        colNonSig="grey60", colSig="blue", colLine="grey40")
 ```
 
+For ranking genes by effect size, one would rank by
+`abs(log2FoldChange)` (with `decreasing=TRUE`), instead of by `padj`.
+
+In the next series of code chunks, I demonstrate how to add additional
+identifiers, such as gene symbols to the MA-plot. We can select a 
+subset of genes to add labels, here we filter the results table to a 
+set of genes based on `baseMean` and `log2FoldChange` (these choices
+are arbitrary, mostly for demonstration). For a given experiment, it 
+would make more sense to pick out relevant genes by both significance,
+effect size, and biological interpretation. Because I have not
+re-ordered the `lfc` results table, I can add the `SYMBOL` column
+to the table, and then create a smaller table with our genes of 
+interest.
 
 ```{r symbols}
 lfc$SYMBOL <- mcols(dds)$SYMBOL
@@ -258,6 +340,9 @@ tab <- lfc %>% as.data.frame %>%
                between(abs(log2FoldChange), 1, 4))
 tab <- tab[complete.cases(tab),]
 ```
+
+We now highlight the genes in `tab` using the `points` and `text` 
+functions.
 
 ```{r ma-symbols}
 plotMA(lfc, ylim=c(-4,4),
@@ -268,12 +353,21 @@ with(tab, {
 })
 ```
 
+That worked, although it's not easy to see the labels for a set of
+overlapping points below the horizontal axis. We can make a nicer
+looking plot using *ggplot2*. First we create a data frame that we 
+will pass to the `ggplot` function.
+
 ```{r signif}
 dat <- as.data.frame(lfc)
 dat <- dat[complete.cases(dat),]
 dat <- dat %>% mutate(sig = ifelse(padj < .1, "Y", "N"))
 tab$sig <- "Y"
 ```
+
+The following `ggplot` code chunk recreates the MA-plot that is
+built into *DESeq2*, but also uses the *ggrepel* package to make sure
+the point labels for our genes of interest do not overlap:
 
 ```{r ma-repel}
 library(ggplot2)
@@ -285,9 +379,24 @@ ggplot(dat, aes(baseMean, log2FoldChange, col=sig, label=SYMBOL)) +
         geom_point(data=tab, shape=1, size=5, show.legend=FALSE) + 
         geom_label_repel(data=tab,
                          nudge_x = 1,
-                         nudge_y = 2* sign(tab$log2FoldChange),
+                         nudge_y = 2*sign(tab$log2FoldChange),
                          show.legend=FALSE)
 ```
+
+## Hypothesis weighting
+
+In the last series of code chunks, I will demonstrate the use of 
+Independent Hypothesis Weighting (IHW) [@Ignatiadis2016], in lieu of
+the more simplistic mean count filtering that is used in `results`
+by default. Instead of finding a threshold on the mean of scaled 
+counts that optimizes the number of rejected hypotheses following
+Benjamini-Hochberg correction [@Benjamini1995], the *IHW* package 
+finds an optimal weighting of the hypotheses that maximizes power 
+while still controlling the FDR.
+
+To use *IHW* instead of mean count thresholding, we pass the `ihw`
+function to the `filterFun` argument of `results`. A similar number
+of genes are detected as differentially expressed in this case.
 
 ```{r ihw, cache=TRUE}
 library(IHW)
@@ -295,11 +404,20 @@ res.ihw <- results(dds, name="lineOCT4.conditiontrt", filterFun=ihw)
 summary(res.ihw)
 ```
 
+We can observe the weighting of hypotheses for various mean count
+ranges, across the cross-validation folds. For more details on the 
+methods used here, consult the *IHW* package vignette and the methods
+publication by @Ignatiadis2016.
+
 ```{r ihw-obj}
 ihw.obj <- metadata(res.ihw)$ihwResult
 plot(ihw.obj)
 ```
 
+Again, we can show that a similar set of genes were found in this case
+although in general the *IHW* procedure can outperform the simple
+filtering rules that `results` uses by default.
+
 ```{r compare-fdr}
-table(res$padj < .05, IHW=res.ihw$padj < .05)
+table(filter=res$padj < .05, IHW=res.ihw$padj < .05)
 ```

@@ -89,7 +89,7 @@ a computational reproducibility feature that will be described later
 in this section.
 
 ```{r dplyr}
-library(dplyr)
+suppressPackageStartupMessages(library(dplyr))
 coldata <- coldata %>% 
   mutate(line=factor(line, levels=c("OCT4","BRG1")),
          condition=factor(condition, levels=c("untrt","trt")),
