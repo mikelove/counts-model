@@ -42,3 +42,7 @@ and without error:
 
 * [rnaseqGene](https://bioconductor.org/packages/rnaseqGene) - gene-level exploratory analysis and differential expression [@Love2015]
 * [rnaseqDTU](https://bioconductor.org/packages/rnaseqDTU) - differential transcript usage [@Love2018]
+
+Another related reference is @Berge2019, which is a review of RNA-seq
+expression analysis, written by a collection of researchers who
+develop statistical models and software for RNA-seq data.

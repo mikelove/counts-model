@@ -4,6 +4,6 @@ In this final chapter, I discuss limitations to the methods presented
 earlier, and extensions for analyzing high dimensional counts. 
 
 * Single cell [@Berge2018] [@Soneson2018] [@Sun2019]
-* Long reads 
-* Genetic variation
-* Microbiome
+* Long reads [@Soneson2019]
+* Genetic variation [@Castel2015] [@Raghupathy2018] [@Srivastava2019Align]
+* Microbiome [@Fernandes2014] [@Callahan2016] [@Sankaran2018] [@Willis2019]
