@@ -5,6 +5,24 @@ Here is some more text
 * Uncertainty
 * DTU
 
+[@Li2011]
+
+[@Zhu2019]
+
+[@Storey2003]
+
+[@Alasoo2018]
+
+[@Love2016Modeling]
+
+[@Nowicka2016]
+
+[@VanDenBerge2017]
+
+[@Soneson2016]
+
+[@Anders2012]
+
 ```{r sysdir2}
 dir <- system.file("extdata", package="macrophage")
 list.files(dir)

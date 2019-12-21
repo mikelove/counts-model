@@ -9,7 +9,7 @@ scaling factors, estimate biological dispersion within groups of
 samples, and perform differential testing per gene [@Love2014].
 
 Some other popular Bioconductor packages for RNA-seq analysis include the 
-*edgeR* package [@Robinson2010,@McCarthy2012] and the *limma-voom*
+*edgeR* package [@Robinson2010;@McCarthy2012] and the *limma-voom*
 method in the *limma* package [@Law2014]. The approach taken by
 *DESeq2* for estimation of dispersion is similar to the method
 proposed by @Wu2012 in the *DSS* Bioconductor package.
@@ -209,11 +209,20 @@ called, ``The DESeq2 model''.
 dds <- DESeq(dds)
 ```
 
-One of the key estimates is the dispersion for each gene. Here I plot
-the estimates over the mean of scaled counts for each gene. Note that
-many of the plots in *DESeq2* refer to "normalized counts"; here this
-just implies scaling the counts by the size factor, so that the 
-library size differences across samples are minimized.
+One of the key estimates is the dispersion for each gene. *DESEq2*
+uses a combination of methods to estimate the dispersion. First, the
+gene-wise estimate is produced using the methods proposed by 
+*edgeR* in 2012 for a Negative Binomial generalized linear model (GLM)
+[@McCarthy2012]. Briefly, the maximum adjusted profile likelihood 
+estimate is calculated, where the adjustment of @Cox1987 is used to 
+avoid a downward bias on the dispersion. This bias adjustment is 
+similar conceptually to the the use of $\frac{1}{n-1}$ in estimating
+the sample variance.
+
+Below I plot the estimates over the mean of scaled counts for each
+gene. Note that many of the plots in *DESeq2* refer to "normalized
+counts"; here this just implies scaling the counts by the size factor,
+so that the library size differences across samples are minimized.
 
 There are two per-gene estimates, an initial estimate which looks only
 at the data for a single gene (`gene-est`, black points), and a final
@@ -230,11 +239,21 @@ plotDispEsts(dds, ylim=c(1e-3, .5), xlim=c(5,1e5))
 Below I will continue with per-gene analysis, but first, I demonstrate
 how to examine differences across the most variable genes using a PCA
 plot. Before I compute the principal components, I use the `vst`
-function to compute a variance stabilizing transformation of the count
-data. This is similar to a log2 transform but avoids inflating the
-variance of the low count genes. For more details on the methods used
-here to compute the transformation, consult the *DESeq2* vignette or
-`?vst`. We specify `blind=FALSE` which will use the sample grouping 
+function to compute a variance stabilizing transformation (VST)
+[@Tibshirani1988] of the count data. This is similar to a log2
+transform but avoids inflating the variance of the low count genes.
+For more details on the methods used here to compute the
+transformation, consult the *DESeq2* vignette or `?vst`. The specific 
+VST used by *DESeq2* for RNA-seq counts was proposed by the first 
+*DESeq* paper by @Anders2010.
+
+Another option for performing dimension reduction (as in PCA) 
+on count data is to use the Poisson distance [@Witten2011]
+or GLM-PCA [@Townes2019]. These two alternatives are explored in the
+[gene-level RNA-seq workflow](https://bioconductor.org/packages/rnaseqGene)
+hosted on Bioconductor.
+
+Below I specify `blind=FALSE` which will use the sample grouping 
 information when calculating the per-gene dispersion. The 
 transformation itself does not use the design, once the global 
 dispersion information has been fit.
@@ -296,6 +315,10 @@ shrunken LFC instead of MLE.
 library(apeglm)
 lfc <- lfcShrink(dds, coef="lineOCT4.conditiontrt", type="apeglm")
 ```
+
+Another option for shrinkage is to specify `type="ashr"` which will
+make use of the *ashr* package for shrinkage of effect sizes, 
+with methods described by @Stephens2016.
 
 We can now examine the differences between the MLE and the Bayesian
 estimate of fold change from *apeglm*. First the MLE:
