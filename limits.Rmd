@@ -1,8 +1,9 @@
 # Limitations and extensions {#limits}
 
-Here is some more text
+In this final chapter, I discuss limitations to the methods presented
+earlier, and extensions for analyzing high dimensional counts. 
 
-* Single cell
+* Single cell [@Berge2018] [@Soneson2018] [@Sun2019]
 * Long reads 
 * Genetic variation
 * Microbiome
