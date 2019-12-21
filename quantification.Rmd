@@ -125,7 +125,7 @@ uncertainty information in this first analysis. I will show
 in a later section how to make use of the inferential replicates
 computed by *Salmon* during quantification.
 
-```{r}
+```{r load-txi}
 library(tximeta)
 ```
 
@@ -143,7 +143,7 @@ did not document this when uploading to a public repository.
 We can see the matrices of data that have been compiled, and 
 examine the genomic locations of the features (rows):
 
-```{r}
+```{r load-se}
 library(SummarizedExperiment)
 ```
 

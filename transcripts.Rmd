@@ -1,6 +1,8 @@
-# Transcript level {#transcripts}
+# Transcript expression {#transcripts}
 
-Here is some more text
+In the previous chapters, I showed importing transcript-level data
+with *tximeta*, summarizing the data to gene-level counts, and 
+modeling the gene-level counts with *DESeq2*.
 
 * Uncertainty
 * DTU
@@ -14,6 +16,14 @@ Here is some more text
 [@Alasoo2018]
 
 [@Love2016Modeling]
+[@Patro2017]
+
+[@Glaus2012]
+[@AlSeesi2014]
+[@Pimentel2017]
+[@Bray2016]
+
+[@Love2018]
 
 [@Nowicka2016]
 
@@ -54,7 +64,7 @@ suppressPackageStartupMessages(library(SummarizedExperiment))
 y <- tximeta(coldata)
 ```
 
-```{r sub-y}
+```{r sub-y, cache=TRUE}
 y <- y[seqnames(y) == "chr1",]
 ```
 
@@ -65,7 +75,7 @@ y <- labelKeep(y)
 y <- y[mcols(y)$keep,]
 ```
 
-```{r swish}
+```{r swish, cache=TRUE}
 set.seed(1)
 y <- swish(y, x="condition", pair="line", quiet=TRUE)
 ```
