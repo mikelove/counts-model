@@ -1,9 +1,93 @@
 # Limitations and extensions {#limits}
 
 In this final chapter, I discuss limitations to the methods presented
-earlier, and extensions for analyzing high dimensional counts. 
+earlier, and extensions for analyzing high dimensional counts in 
+contexts beyond what was previously covered.
 
-* Single cell [@Berge2018] [@Soneson2018] [@Sun2019]
-* Long reads [@Soneson2019]
-* Genetic variation [@Castel2015] [@Raghupathy2018] [@Srivastava2019Align]
-* Microbiome [@Fernandes2014] [@Callahan2016] [@Sankaran2018] [@Willis2019]
+1. **Single cell RNA-seq** - The *DESeq2* framework shown in the 
+   gene-level analysis chapter was designed for bulk RNA-seq, in which
+   the Negative Binomial GLM assessing differences across samples was
+   suitable both in terms of distribution and in terms of answering
+   many biological questions of interest. In single cell RNA-seq, 
+   there are new considerations and questions of interest. One aspect
+   is that, with UMI barcoding, there is a need for quantification 
+   methods that resolve errors and de-duplicate the read data into 
+   molecule counts per cell. The *alevin* method [@Srivastava2019], 
+   packaged within the *Salmon* software, can accomplish this UMI
+   de-duplication, and can resolve the increased rate of multi-mapping 
+   reads seen in 3' tagged sequencing, through an approach similar
+   to that taken by *Salmon*. The quantification from *alevin* can
+   be easily imported into R/Bioconductor using the *tximeta* 
+   software seen in the quantification chapter.
+
+   After quantification, there are many choices regarding the analysis
+   pipeline, I refer to recent reviews for systematic comparison.
+   @Soneson2018 evaluates methods for detecting differences in 
+   expression across groups of cells. @Sun2019 evalutes methods for
+   dimension reduction, which is often performed in the context of
+   cell clustering and lineage reconstruction. @Duo2018 evaluates 
+   methods for clustering to recover sub-populations of cells.
+   Finally, I note that the NB methods shown in the gene-level
+   chapter can be combined with other statistical methods to add and
+   model a zero component, in the case that the Negative Binomial is
+   not a suitable distribtion [@Berge2018]. The zero component may not
+   be needed for all scRNA-seq datasets however, in particular if UMI
+   de-duplication is possible.
+2. **Long reads** - The data presented in previous sections involved
+   sequencing relatively short sequences of the cDNA fragments. They 
+   sequences are short in the sense that they do not come close to 
+   capturing the entire sequence of the transcript for most mammalian
+   transcripts. However, new technologies have emerged in the past
+   decade that allow for high-throughput sequencing of lengths
+   that approach the entire transcript length. This necessitates
+   new methods for alignment (the long sequences nevertheless have a
+   higher error rate than the "short" reads). One of the most popular
+   methods for aligning long reads is *minimap2* [@Li2018]. Following
+   alignment, it is possible to again quantify expression using
+   *Salmon* and import the data into R/Bioconductor using *tximeta*.
+   A systematic evaluation of quantification using the Nanopore
+   long read technology has been performed by @Soneson2019.
+3. **Genetic variation** - An aspect not explored in the previous 
+   sections was genetic variation across the samples in the exonic 
+   sequence. One analysis of interest is to identify common genetic 
+   variants in the exonic sequence, and to quantify, among the 
+   samples that are heterozygous for a given exonic SNP, the 
+   expression of each allele. Best practices for allelic expression
+   analysis have been presented by @Castel2015, and an evaluation
+   of EM-based methods for assessing allelic expression have been
+   proposed and compared by @Raghupathy2018. Aside from interest in 
+   quantifying allelic expression in the presence of heterozygous
+   exonic positions, @Srivastava2019Align have examined the effect
+   of genetic variation on transcript and gene expression 
+   quantification.
+4. **Microbiome** - I have described here various methods to analyzing
+   counts reflecting the abundance of RNA molecules across samples. 
+   Another type of high dimensional count dataset with similar but
+   distinct analysis considerations is that produced in a microbiome
+   or metagenomic study, in which the counts reflect the abundance
+   of certain taxa across samples. The count data is arranged in a 
+   similar format to gene expression, but with the taxa replacing the
+   transcript or genes on the rows of the matrix. 
+   
+   While many have considered using gene expression normalization and
+   testing methods for analyzing this type of data, a number of the
+   assumptions used in gene expression models may be invalid for
+   microbiome. In particular, I demonstrated in the first exploration
+   of gene expression counts that there were thousands of features in
+   which the changes from sample to sample were minimal. There was a
+   clear center of the distribution of log fold changes that could be
+   used to estimate the size factors for scaling normalization across
+   samples. In microbiome studies, this assumption may not fit, as 
+   there may not be a group of taxa that can be assumed roughly
+   equally abundant across all samples in a dataset. In addition, 
+   there may be too few taxa, such that the Poisson modeling 
+   assumption no longer makes sense, and so a compositional model 
+   may better capture the distributional properties [@Fernandes2014].
+   
+   Alternative pipelines for analyzing microbiome abundance data
+   have been detailed by @Callahan2016. There may be more interesting
+   and relevant approaches to modeling the counts besides the GLM, and
+   latent variable models are considered and applied to microbiome 
+   datasets recently by @Sankaran2018. Finally, statistical 
+   considerations of various diversity measures for count-based
+   microbiome studies have been explored recently by @Willis2019.
