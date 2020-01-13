@@ -32,10 +32,15 @@ of fragments per sample, which are distributed across tens of
 thousands of genes, although there is inevitably a range of sequencing
 depth for each sample:
 
+```{r setup-model}
+options(width=65)
+```
+
 ```{r colsums}
 assayNames(gse)
 cs <- colSums(assay(gse, "counts"))
-hist(cs/1e6, col="grey", border="white")
+hist(cs/1e6, col="grey", border="white",
+     main="", xlab="column sums (per million)")
 ```
 
 Let us first consider just two samples, one from OCT4 untreated group
@@ -76,7 +81,9 @@ RNA-seq data in *DESeq2*.
 ```{r maplot}
 library(rafalib)
 maplot(log10(p[,1]), log10(p[,2]), n=nrow(p), 
-       cex=.3, col=rgb(0,0,0,.2))
+       cex=.3, col=rgb(0,0,0,.2),
+       xlab="log10 proportion (geometric mean)", 
+       ylab="log10 fold change")
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
@@ -100,14 +107,17 @@ statistical distribution.
 
 ```{r mean-prob}
 mean.log.p <- rowMeans(log10(p))
-hist(mean.log.p,  col="grey", border="white")
+hist(mean.log.p,  col="grey", border="white",
+     main="", xlab="log10 proportion (geometric mean)")
 ```
 
 ```{r maplot2}
 library(rafalib)
 maplot(log10(p[,1]), log10(p[,2]), n=nrow(p),
        xlim=c(-6.5, -3.5), ylim=c(-2,2),
-       cex=.3, col=rgb(0,0,0,.2))
+       cex=.3, col=rgb(0,0,0,.2),
+       xlab="log10 proportion (geometric mean)", 
+       ylab="log10 fold change")
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
@@ -129,7 +139,8 @@ lfc <- log2(p[,2]) - log2(p[,1])
 hist(lfc[between(mean.log.p, -6, -4)], 
      breaks=seq(-10,10,by=.1),
      xlim=c(-5,5),
-     col="grey50", border="white")
+     col="grey50", border="white",
+     main="", xlab="log2 fold change of proportion")
 ```
 
 Again we see that it's rare for there to be an extreme change (more
@@ -157,7 +168,9 @@ idx <- rowSums(sim.cts >= 5) == 2
 sim.cts <- sim.cts[idx,]
 sim.p <- sweep(sim.cts, 2, colSums(sim.cts), "/")
 maplot(log10(sim.p[,1]), log10(sim.p[,2]), n=nrow(p), 
-       cex=.3, col=rgb(0,0,0,.2))
+       cex=.3, col=rgb(0,0,0,.2),
+       xlab="log10 proportion (geometric mean)", 
+       ylab="log10 fold change")
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
@@ -397,6 +410,8 @@ library(ggplot2)
 library(ggrepel)
 ggplot(dat, aes(baseMean, log2FoldChange, col=sig, label=SYMBOL)) + 
         geom_point() + scale_x_log10() + 
+        xlab("mean of normalized counts") + 
+        ylab("log fold change") + 
         geom_hline(yintercept=0, col="grey40") + 
         scale_color_manual(values=c("grey60", "blue")) +
         geom_point(data=tab, shape=1, size=5, show.legend=FALSE) + 

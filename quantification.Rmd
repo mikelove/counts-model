@@ -55,6 +55,10 @@ of the `system.file` command below, which is used here to locate
 a file within an R package, you could just specify the `dir` 
 variable to be a path to the files, e.g. `/path/to/data/dir`.
 
+```{r setup-quant}
+options(width=65)
+```
+
 ```{r sysdir}
 dir <- system.file("extdata", package="oct4")
 list.files(dir)

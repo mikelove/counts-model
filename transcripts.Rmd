@@ -45,8 +45,8 @@ processed RNA-seq data from an experiment by @Alasoo2018, a subset of
 which is available in the *macrophage* Biconductor package. The
 experiment involved measuring transcription in macrophage cell lines
 from a number of human donors, both untreated, as well as treated with 
-IFNγ, *Salmonella*, and IFNγ combined with *Salmonella*. Here I will
-focus on the samples that were untreated and treated with IFNγ. As
+IFNg, *Salmonella*, and IFNg combined with *Salmonella*. Here I will
+focus on the samples that were untreated and treated with IFNg. As
 each cell line was from a human donor, we will also want to control
 for a baseline donor effect when comparing across treatment.
 
@@ -106,18 +106,24 @@ I then read in the sample table, and use *dplyr* to select certain
 columns, convert columns into factors, and add a new column pointing
 to the quantification files.
 
+```{r setup-txps}
+options(width=65)
+```
+
 ```{r coldata2}
 library(readr)
 library(dplyr)
 coldata <- read_csv(file.path(dir,"coldata.csv"))
+lvls <- c("naive","IFNg","SL1344","IFNg_SL1344")
 coldata <- coldata %>% 
-  dplyr::select(names, id=sample_id, line=line_id, condition=condition_name) %>%
+  dplyr::select(names, id=sample_id, line=line_id, 
+                condition=condition_name) %>%
   mutate(line=factor(line),
-         condition=factor(condition, levels=c("naive","IFNg","SL1344","IFNg_SL1344")),
+         condition=factor(condition, levels=lvls),
          files=file.path(dir, "quants", names, "quant.sf.gz"))
 ```
 
-I will only consider for this demonstration the untreated and IFNγ
+I will only consider for this demonstration the untreated and IFNg
 treated samples:
 
 ```{r filter}
@@ -204,7 +210,8 @@ with a spike on the left side representing the rejections of the null
 hypothesis.
 
 ```{r swish-hist}
-hist(mcols(y)$pvalue, col="grey")
+hist(mcols(y)$pvalue, col="grey",
+     main="", xlab="p-values")
 ```
 
 As with *DESeq2* I can make an MA-plot, with the differential
