@@ -5,7 +5,7 @@ date: "`r Sys.Date()`"
 site: bookdown::bookdown_site
 documentclass: book
 bibliography: book.bib
-biblio-style: apalike
+csl: apalike.csl
 link-citations: yes
 description: "This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor."
 ---
