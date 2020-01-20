@@ -174,8 +174,11 @@ minimal count to a lower value such as 3. The minimal number of
 samples can be increased for experiments with many samples, to
 decrease the number of transcripts considered by the test.
 
-```{r fishpond-scale-label, cache=TRUE}
+```{r fishpond-load}
 library(fishpond)
+```
+
+```{r fishpond-scale-label, cache=TRUE}
 y <- scaleInfReps(y, quiet=TRUE)
 y <- labelKeep(y)
 y <- y[mcols(y)$keep,]

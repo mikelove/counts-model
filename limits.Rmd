@@ -72,17 +72,21 @@ contexts beyond what was previously covered.
    While many have considered using gene expression normalization and
    testing methods for analyzing this type of data, a number of the
    assumptions used in gene expression models may be invalid for
-   microbiome. In particular, I demonstrated in the first exploration
-   of gene expression counts that there were thousands of features in
-   which the changes from sample to sample were minimal. There was a
-   clear center of the distribution of log fold changes that could be
-   used to estimate the size factors for scaling normalization across
-   samples. In microbiome studies, this assumption may not fit, as 
-   there may not be a group of taxa that can be assumed roughly
-   equally abundant across all samples in a dataset. In addition, 
-   there may be too few taxa, such that the Poisson modeling 
-   assumption no longer makes sense, and so a compositional model 
-   may better capture the distributional properties [@Fernandes2014].
+   particular microbiome datasets. In particular, I demonstrated in 
+   the first exploration of gene expression counts that there were
+   thousands of features in which the changes from sample to sample
+   were minimal. There was a clear center of the distribution of log
+   fold changes that could be used to estimate the size factors for
+   scaling normalization across samples. In particular microbiome
+   studies, this assumption may not fit, as there may not be a group
+   of taxa that can be assumed roughly equally abundant across all
+   samples in a dataset. In addition, there may be too few taxa, such
+   that the Poisson modeling assumption no longer makes sense, and so
+   a compositional model may better capture the distributional
+   properties [@Fernandes2014]. A recent benchmarking effort compares
+   compositional methods as well as single cell RNA-seq methods for
+   analyzing microbiome datasets for differences in abundance of taxa
+   [@Calgaro2020].
    
    Alternative pipelines for analyzing microbiome abundance data
    have been detailed by @Callahan2016. There may be more interesting
