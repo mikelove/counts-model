@@ -32,7 +32,7 @@ of fragments per sample, which are distributed across tens of
 thousands of genes, although there is inevitably a range of sequencing
 depth for each sample:
 
-```{r setup-model}
+```{r setup-model, include=FALSE}
 options(width=65)
 ```
 
@@ -43,26 +43,25 @@ hist(cs/1e6, col="grey", border="white",
      main="", xlab="column sums (per million)")
 ```
 
-Let us first consider just two samples, one from OCT4 untreated group
-and one from the OCT4 treated group. I will make a plot examining the
-proportion of the total count for each gene. I will first subset to
-only those genes where both samples have a count of 5 or more, to cut
-down on the number of points to plot. Here I use the total count,
-`colSums(cts)` to divide the counts for each sample, while later we
-will discuss a robust estimator for sequencing depth variation across
-samples.
+Let us first consider just two samples, one from the OCT4 untreated
+group and one from the OCT4 treated group. I will make a plot
+examining the proportion of the total count for each gene. I will
+first subset to only those genes where both samples have a count of 5
+or more, to cut down on the number of points to plot. Here I use the
+total count, `colSums(cts)` to divide the counts for each sample,
+while later we will discuss a robust estimator for sequencing depth
+variation across samples.
 
 Before I create the proportions, it's important to remember that,
 because genes with longer transcripts will produce more cDNA
 fragments, the proportion estimated here (without taking into account
 the length of the feature) does not estimate the proportion of
 *molecules*. The `abundance` assay of the `gse` object contains
-estimates of the molecules, in transcripts per million (TPM). For more
-on how these estimates are computed, consult the *Salmon* methods
-paper [@Patro2017].
+estimates of the proportions of the molecules, in transcripts per
+million (TPM). For more on how these estimates are computed, consult
+the *Salmon* paper [@Patro2017].
 
 ```{r make-prob}
-colData(gse)
 cts <- assay(gse, "counts")[,c(1,4)]
 idx <- rowSums(cts >= 5) == 2
 cts <- cts[idx,]
@@ -87,15 +86,16 @@ maplot(log10(p[,1]), log10(p[,2]), n=nrow(p),
 abline(h=0, col=rgb(0,0,1,.5))
 ```
 
-The red line is a smooth curve through the log ratios 
-(here $\log_{10}$, although we will later switch to $\log_2$ for the
-ratios). Note that the line is relatively flat across many orders of
-magnitude of the proportion. So whether the gene has 1 millionth of
-the total count (-6) or up to one thousandth of the total count (-3),
-the ratio between the two samples tends to fluctuate around 0, with
-most of the points somewhere between -0.1 and 0.1. The points further
-off the horizontal line may indicate differentially expressed genes,
-but we will better identify these using all of the replicates.
+The red line is a smooth curve through the log ratios (here
+$\log_{10}$, although we will later switch to $\log_2$ for more
+interpretable ratios). Note that the line is relatively flat across
+many orders of magnitude of the proportion. So whether the gene has 1
+millionth of the total count (-6) or up to one thousandth of the total
+count (-3), the ratio between the two samples tends to fluctuate
+around 0, with most of the points somewhere between -0.1 and 0.1. The
+points further off the horizontal line may indicate differentially
+expressed genes, but we will better identify these using all of the
+replicates.
 
 While just considering the two samples, I can also examine the
 histogram of the x-axis above, the mean of the $\log_{10}$ proportions
@@ -103,7 +103,7 @@ histogram of the x-axis above, the mean of the $\log_{10}$ proportions
 proportions). We see that most genes that we are considering fall in
 the range from 1/10,000,000 (-7) to 1/10,000 (-4) of the total
 count. That these ratios are very low is relevant for the choice of
-statistical distribution.
+statistical distribution for the counts.
 
 ```{r mean-prob}
 mean.log.p <- rowMeans(log10(p))
@@ -122,17 +122,17 @@ abline(h=0, col=rgb(0,0,1,.5))
 ```
 
 I will zoom out on the y-axis and zoom in on the x-axis on the MA-plot
-to emphasize that for the range where most of the genes are, there is
-actually not much variation in the ratio of proportions across the
-treatment. 
+to emphasize that, for the range containing most of the genes,
+the middle of the distribution of the ratio of proportions across the
+treatment is centered on 0.
 
-$10$ is not a great base for the logarithm, because it's extreme to
-have a 10 fold change, and then it becomes hard to interpret the
-meaningful changes in the range from 0 to 1. Much better is to use
-$\log_2$, as we can easily interpret 1 as doubling, 2 as quadrupling,
-etc. Now I calculate the $\log_2$ ratio of proportions and plot the
-histogram of these log ratios, when the log10 mean proportion is
-between -6 and -4:
+The base of $10$ is not a great choice for the logarithm, because it's
+not common to have a 10 fold change, and then it becomes hard to
+interpret the meaningful changes in the range from 0 to 1. Much better
+is to use $\log_2$, as we can easily interpret 1 as doubling, 2 as
+quadrupling, etc. Now I calculate the $\log_2$ ratio of proportions
+and plot the histogram of these log ratios, for genes where the log10
+mean proportion is between -6 and -4:
 
 ```{r lfc-hist}
 lfc <- log2(p[,2]) - log2(p[,1])
@@ -175,8 +175,9 @@ abline(h=0, col=rgb(0,0,1,.5))
 ```
 
 Note that, even after filtering out genes that do not have a count of
-5 or more for both samples, there is still substantial inflation of
-the ratio of proportions for the small count genes.
+5 or more for both samples, there is still substantial variance for 
+the ratio of proportions for the small count genes compared to the 
+large count genes.
 
 ## Modeling counts with DESeq2
 
@@ -189,7 +190,7 @@ vignette and `?results` help page.
 
 I create a *DESeqDataSet* object, by providing the gene-level
 *SummarizedExperiment* object, and specifying the `design`, which is a
-formula expressing how we wish to model the counts. Here, we specify a
+formula expressing how we wish to model the counts. Here, I specify a
 baseline term for each `line` (OCT4 or BRG1), and a condition effect
 specific to each line (so comparing treated vs untreated, specific to
 each line). The colon between `line` and `condition` specifies to form
@@ -200,9 +201,9 @@ library(DESeq2)
 dds <- DESeqDataSet(gse, design=~line + line:condition)
 ```
 
-After creating the dataset, we perform some minimal filtering that
-makes sense for bulk RNA-seq. We insist that there be at least three
-samples with a count of 10 or more to keep the gene in the
+After creating the dataset, I perform some minimal filtering that
+makes sense for bulk RNA-seq. I filter such that there must be at
+least three samples with a count of 10 or more to keep the gene in the
 dataset. This will reduce the size of the dataset (here, removing more
 than half of the genes) and the time needed to fit various per-gene
 parameters, such as dispersion and fold change estimates.
@@ -216,26 +217,32 @@ dds <- dds[keep,]
 The parameters are estimated with a single call to the `DESeq`
 function. For details on all the steps performed by this function,
 check the help page `?DESeq`, as well as a section of the vignette
-called, ``The DESeq2 model''.
+called, ``The DESeq2 model''. Briefly, *DESeq2* computes a robust
+size factor which outperforms the total count in adjusting for
+differential sequence depth across libraries. Then *DESeq2* computes
+(iteralively) the coefficients of a generalized linear model (GLM),
+and a dispersion parameter that reflects the variation in addition
+to the Poisson variation, around the expected value for each sample 
+conditioned on information in the design matrix.
 
 ```{r deseq, cache=TRUE}
 dds <- DESeq(dds)
 ```
 
-One of the key estimates is the dispersion for each gene. *DESEq2*
+One of the key estimates is the dispersion for each gene. *DESeq2*
 uses a combination of methods to estimate the dispersion. First, the
 gene-wise estimate is produced using the methods proposed by 
 *edgeR* in 2012 for a Negative Binomial generalized linear model (GLM)
 [@McCarthy2012]. Briefly, the maximum adjusted profile likelihood 
 estimate is calculated, where the adjustment of @Cox1987 is used to 
-avoid a downward bias on the dispersion. This bias adjustment is 
-similar conceptually to the the use of $\frac{1}{n-1}$ in estimating
-the sample variance.
+avoid a downward bias on the dispersion estimate. This bias adjustment
+is similar in theory to the the use of $\frac{1}{n-1}$ in
+estimating the sample variance.
 
 Below I plot the estimates over the mean of scaled counts for each
 gene. Note that many of the plots in *DESeq2* refer to "normalized
 counts"; here this just implies scaling the counts by the size factor,
-so that the library size differences across samples are minimized.
+so that the differences affecting counts across samples are minimized.
 
 There are two per-gene estimates, an initial estimate which looks only
 at the data for a single gene (`gene-est`, black points), and a final
@@ -264,12 +271,12 @@ Another option for performing dimension reduction (as in PCA)
 on count data is to use the Poisson distance [@Witten2011]
 or GLM-PCA [@Townes2019]. These two alternatives are explored in the
 [gene-level RNA-seq workflow](https://bioconductor.org/packages/rnaseqGene)
-hosted on Bioconductor.
+hosted on Bioconductor [@Love2015].
 
 Below I specify `blind=FALSE` which will use the sample grouping 
 information when calculating the per-gene dispersion. The 
 transformation itself does not use the design, once the global 
-dispersion information has been fit.
+dispersion trend has been fit.
 
 ```{r pca}
 vsd <- vst(dds, blind=FALSE)
@@ -281,11 +288,12 @@ genes is the cell line difference (OCT4 vs BRG1), and the second
 axis corresponds to treatment differences, though note that these
 are not consistent across cell line.
 
-We can extract various results tables from the `dds` object, based
+I can extract various results tables from the `dds` object, based
 on the design. Here I extract a table of results for the effect of 
 condition in the OCT4 line. The `summary` function will provide a 
 summary table across all genes. We observe more than a thousand genes
-up- and down-regulated with response to treatment for this comparison.
+up- and down-regulated with response to treatment for this comparison,
+for a false discovery rate (FDR) cutoff of 10%.
 
 ```{r results}
 resultsNames(dds)
@@ -294,9 +302,9 @@ summary(res)
 ```
 
 The genes with an adjusted p-value, `padj`, less than a threshold, 
-say 0.1, provide a set that is expected to control a corresponding 
-false discovery rate (FDR), for example no more than 10% of the genes
-in the set should be false positives.
+say 0.1, provide a set that is expected to control its nominal FDR,
+for example no more than 10% of the genes in such a set on average 
+should be false positives.
 
 We can look at the top lines of the results table. Note that *DESeq2* 
 does not sort the table, this must be done by the user. The top
@@ -307,21 +315,22 @@ the user performs an ordering operation.
 head(res, 3)
 ```
 
-For example, ordering adjusted p-values from small to large (but then
-remember that this object is no long aligned with `dds` for example).
+For example, I can order adjusted p-values from small to large (but 
+then remember that this object is no long aligned with rows of `dds` 
+for example).
 
 ```{r results-order}
 res.ord <- res[order(res$padj),]
 ```
 
-I will show how to examine the differences across all genes in an 
-MA-plot. But first, I will compute a new estimate of fold change.
-The estimate in the results table is the MLE, or maximum likelihood
-estimate, which is highly variable for low count genes (as we saw
-in the simulated example). Here I compute a Bayesian estimate for the
-fold change using methods in the *apeglm* package [@Zhu2018]. The 
+I will show how to examine the differences across all genes in an
+MA-plot. But first, I will compute a new estimate of fold change. The
+estimate in the results table above is the MLE, or maximum likelihood
+estimate, which is highly variable for low count genes (as we saw in
+the simulated example). Here I compute a Bayesian estimate for the
+fold change using methods in the *apeglm* package [@Zhu2018]. The
 *apeglm* functions are wrapped up in a *DESeq2* function called
-`lfcShrink`, which produces a table similar to `results` but with 
+`lfcShrink`, which produces a table similar to `results` but with
 shrunken LFC instead of MLE.
 
 ```{r apeglm, cache=TRUE}
@@ -359,15 +368,15 @@ For ranking genes by effect size, one would rank by
 `abs(log2FoldChange)` (with `decreasing=TRUE`), instead of by `padj`.
 
 In the next series of code chunks, I demonstrate how to add additional
-identifiers, such as gene symbols to the MA-plot. We can select a 
-subset of genes to add labels, here we filter the results table to a 
+identifiers, such as gene symbols, to the MA-plot. I will select a
+subset of genes to add labels, here filtering the results table to a
 set of genes based on `baseMean` and `log2FoldChange` (these choices
-are arbitrary, mostly for demonstration). For a given experiment, it 
+are arbitrary, solely for demonstration). For a given experiment, it
 would make more sense to pick out relevant genes by both significance,
 effect size, and biological interpretation. Because I have not
-re-ordered the `lfc` results table, I can add the `SYMBOL` column
-to the table, and then create a smaller table with our genes of 
-interest.
+re-ordered the `lfc` results table, I can add the `SYMBOL` column from
+the `dds` object to the results table, and then create a smaller table
+with our genes of interest.
 
 ```{r symbols}
 lfc$SYMBOL <- mcols(dds)$SYMBOL
@@ -377,7 +386,7 @@ tab <- lfc %>% as.data.frame %>%
 tab <- tab[complete.cases(tab),]
 ```
 
-We now highlight the genes in `tab` using the `points` and `text` 
+I now highlight the genes in `tab` using the `points` and `text` 
 functions.
 
 ```{r ma-symbols}
@@ -390,8 +399,8 @@ with(tab, {
 ```
 
 That worked, although it's not easy to see the labels for a set of
-overlapping points below the horizontal axis. We can make a nicer
-looking plot using *ggplot2*. First we create a data frame that we 
+overlapping points below the horizontal axis. I can make a nicer
+looking plot using *ggplot2*. First I create a data frame that I
 will pass to the `ggplot` function.
 
 ```{r signif}
@@ -432,7 +441,7 @@ Benjamini-Hochberg correction [@Benjamini1995], the *IHW* package
 finds an optimal weighting of the hypotheses that maximizes power 
 while still controlling the FDR.
 
-To use *IHW* instead of mean count thresholding, we pass the `ihw`
+To use *IHW* instead of mean count thresholding, I pass the `ihw`
 function to the `filterFun` argument of `results`. A similar number
 of genes are detected as differentially expressed in this case.
 
@@ -447,7 +456,7 @@ summary(res.ihw)
 
 We can observe the weighting of hypotheses for various mean count
 ranges, across the cross-validation folds. For more details on the 
-methods used here, consult the *IHW* package vignette and the methods
+methods used here, consult the *IHW* package vignette and the 
 publication by @Ignatiadis2016.
 
 ```{r ihw-obj}

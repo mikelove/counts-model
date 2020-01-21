@@ -10,17 +10,18 @@ transcript-level analysis:
 
 1. Uncertainty - Because the isoforms of a gene often have a
    considerable amount of sequence similarity resulting from shared
-   exons, and because RNA-seq often involves generating fragments which
-   do not span the entire transcript, there can be considerable
-   uncertainty in assigning a given fragment to a particular
-   transcript. The uncertainty is not constant across the transcripts,
+   exons, and because short read RNA-seq protocols involve generating 
+   fragments that do not span the entire transcript, there can be 
+   considerable uncertainty in assigning a given fragment to a particular
+   transcript (see next chapter for a discussion of long read protocols).
+   The uncertainty is not constant across the transcripts,
    and depends on many factors, some inherent to the gene model, such
    as the size of the alternative exons, and some inherent to the
    experiment, such as the sequencing depth, fragment length, read
    length, and technical biases producing non-uniform coverage.
 2. Isoform switching - We may perform testing for differential
-   expression of each transcript (we will perform this analysis in
-   this chapter), or we may also consider testing whether the usage of
+   *expression* of each transcript (I will perform this analysis in
+   this chapter), or we may also consider testing whether the *usage* of
    the isoforms within a gene changes across condition. The latter
    question is often termed *differential transcript usage* (DTU), and
    can be related to *differential transcript expression* (DTE), but
@@ -32,12 +33,12 @@ transcript-level analysis:
 
 Regarding isoform switching, one reference which explores Bioconductor
 packages that can be used to detect DTU is the *rnaseqDTU*
-Bioconductor workflow mentioned previously [@Love2018]. This workflow
+Bioconductor workflow [@Love2018]. This workflow
 demonstrates optimal filtering techniques [@Soneson2016], how the
-methods *DEXSeq* [@Anders2012] and *DRIMSeq* [@Nowicka2016] can be run
-on transcript counts, and how *stageR* [@VanDenBerge2017] can be
-utilized to detect which genes and which isoforms contain evidence of
-DTU while controlling overall error rates.
+methods *DEXSeq* [@Anders2012] and *DRIMSeq* [@Nowicka2016] can be 
+applied to estimated transcript counts, and how *stageR* 
+[@VanDenBerge2017] can be utilized to detect which genes and which 
+isoforms contain evidence of DTU while controlling overall error rates.
 
 I will first introduce the experimental data, and then discuss various
 approaches used to analyze transcript-level data. I will load some
@@ -47,7 +48,7 @@ experiment involved measuring transcription in macrophage cell lines
 from a number of human donors, both untreated, as well as treated with 
 IFNg, *Salmonella*, and IFNg combined with *Salmonella*. Here I will
 focus on the samples that were untreated and treated with IFNg. As
-each cell line was from a human donor, we will also want to control
+each cell line was from a human donor, I will also control
 for a baseline donor effect when comparing across treatment.
 
 The *macrophage* dataset has paired samples from 6 of the donors (all
@@ -65,11 +66,11 @@ transcripts. A number of statistical methods have been proposed to
 take this measurement uncertainty into account when performing
 downstream testing, including *BitSeq* [@Glaus2012], *mmdiff*
 [@Turro2013], *IsoDE* [@AlSeesi2014], and *Sleuth* [@Pimentel2017],
-which leverages bootstrap quantification estimates from the *kallisto*
-[@Bray2016] quantification method. These methods incorporate
-measurement uncertainty into parametric models for differential
-expression where biological variability is also modeled.  The
-exception is *IsoDE* which compares bootstrap distributions of
+the latter which leverages bootstrap quantification estimates from the
+*kallisto* [@Bray2016] quantification method. These methods
+incorporate measurement uncertainty into parametric models for
+differential expression where biological variability is also modeled.
+The exception is *IsoDE* which compares bootstrap distributions of
 transcript expression for two samples at a time.
 
 Here, I will use a nonparametric method that takes into account both
@@ -77,17 +78,18 @@ inferential uncertainty of fragment assignments, as well as biological
 variability across samples, called *Swish* [@Zhu2019], which is
 available in the *fishpond* Bioconductor package. *Swish* stands for
 "SAMseq With Inferential Samples Helps", as it is based on the
-existing method for differential gene expression, *SAMseq* [@Li2011]. 
-The key idea is to make use of nonparametric testing methods such as
-the Mann-Whitney Wilcoxon statistic, which operate only on the ranks
-of the data across samples. The original *SAMseq* method performed
-resampling of the counts in order to deal with library size
-differences. Here, *Swish* will make use of multiple values for the
-count matrix that were computed by the *Salmon* software, using a
-technique called Gibbs sampling. For more details on the Gibbs
-sampling procedure, consult the publication of *Salmon* [@Patro2017]
-and *mmseq* [@Turro2011]. Finally, the false discovery rate of the
-test statistics averaged over the multiple versions of the counts is
+existing statistical method for differential gene expression, *SAMseq*
+[@Li2011]. The key idea is to make use of nonparametric testing
+methods such as the Mann-Whitney Wilcoxon statistic, which operate
+only on the ranks of the data across samples. The original *SAMseq*
+method performed resampling of the counts in order to account for
+sequencing depth differences. Here, *Swish* will make use of multiple
+values in each cell of the count matrix that were computed by the
+*Salmon* software, using a technique called Gibbs sampling. For more
+details on the Gibbs sampling procedure, consult the publication of
+*Salmon* [@Patro2017] and *mmseq* [@Turro2011]. Finally, the false
+discovery rate of the test statistics averaged over the multiple
+versions (or "inferential replicates") of the counts matrix is 
 computed via a permutation technique [@Storey2003].
 
 I begin by locating the files in the *macrophage* package. As before,
@@ -97,6 +99,10 @@ on a server or compute cluster. In lieu of the `system.file` command
 below, you should just specify the `dir` variable to be a path to the
 files, e.g. `/path/to/data/dir`.
 
+```{r setup-txps, include=FALSE}
+options(width=65)
+```
+
 ```{r sysdir2}
 dir <- system.file("extdata", package="macrophage")
 list.files(dir)
@@ -105,10 +111,6 @@ list.files(dir)
 I then read in the sample table, and use *dplyr* to select certain
 columns, convert columns into factors, and add a new column pointing
 to the quantification files.
-
-```{r setup-txps}
-options(width=65)
-```
 
 ```{r coldata2}
 library(readr)
@@ -164,15 +166,14 @@ y <- y[seqnames(y) == "chr1",]
 
 I load the *fishpond* package, which contains the methods for running
 *Swish*. There are three basic steps: scaling of the inferential
-replicates to make them comparable despite different library size,
+replicates to make them comparable despite different sequencing depth,
 filtering out lowly expressed transcripts, and the testing itself. The
 scaling method by default uses the median ratio method of *DESeq*
 [@Anders2010]. The `labelKeep` function by default will keep those
 transcripts with 3 or more samples with a count of 10 or higher. For
 scRNA-seq with UMI de-duplication, it is recommended to lower the
 minimal count to a lower value such as 3. The minimal number of
-samples can be increased for experiments with many samples, to
-decrease the number of transcripts considered by the test.
+samples can be increased for experiments with many samples.
 
 ```{r fishpond-load}
 library(fishpond)
@@ -198,7 +199,7 @@ y <- swish(y, x="condition", pair="line", quiet=TRUE)
 After running `swish`, all of the results are stored in the metadata
 columns (`mcols`) of the object `y`. I look to see how many
 transcripts have a small q-value (analogous to an adjusted p-value,
-this should provide a set with a specified FDR control).
+this should provide a set with a nominal FDR control).
 
 ```{r swish-sig}
 names(mcols(y))

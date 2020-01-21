@@ -46,7 +46,11 @@ contexts beyond what was previously covered.
    alignment, it is possible to again quantify expression using
    *Salmon* and import the data into R/Bioconductor using *tximeta*.
    A systematic evaluation of quantification using the Nanopore
-   long read technology has been performed by @Soneson2019.
+   long read technology has been performed by @Soneson2019. 
+   Additionally, a pipeline for long read mapping with *minimap2* and 
+   quantification with *Salmon* has been recently published
+   with an associated [GitHub repository](https://bit.ly/3403pVc)
+   [CruzGarcia2019].
 3. **Genetic variation** - An aspect not explored in the previous 
    sections was genetic variation across the samples in the exonic 
    sequence. One analysis of interest is to identify common genetic 
@@ -60,14 +64,14 @@ contexts beyond what was previously covered.
    exonic positions, @Srivastava2019Align have examined the effect
    of genetic variation on transcript and gene expression 
    quantification.
-4. **Microbiome** - I have described here various methods to analyzing
+4. **Microbiome** - I have described here various methods for analyzing
    counts reflecting the abundance of RNA molecules across samples. 
    Another type of high dimensional count dataset with similar but
    distinct analysis considerations is that produced in a microbiome
    or metagenomic study, in which the counts reflect the abundance
    of certain taxa across samples. The count data is arranged in a 
    similar format to gene expression, but with the taxa replacing the
-   transcript or genes on the rows of the matrix. 
+   transcripts or genes on the rows of the matrix. 
    
    While many have considered using gene expression normalization and
    testing methods for analyzing this type of data, a number of the
