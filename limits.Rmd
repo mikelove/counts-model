@@ -23,14 +23,14 @@ contexts beyond what was previously covered.
    After quantification, there are many choices regarding the analysis
    pipeline, I refer to recent reviews for systematic comparison.
    @Soneson2018 evaluates methods for detecting differences in 
-   expression across groups of cells. @Sun2019 evalutes methods for
+   expression across groups of cells. @Sun2019 evaluates methods for
    dimension reduction, which is often performed in the context of
    cell clustering and lineage reconstruction. @Duo2018 evaluates 
    methods for clustering to recover sub-populations of cells.
    Finally, I note that the NB methods shown in the gene-level
    chapter can be combined with other statistical methods to add and
    model a zero component, in the case that the Negative Binomial is
-   not a suitable distribtion [@Berge2018]. The zero component may not
+   not a suitable distribution [@Berge2018]. The zero component may not
    be needed for all scRNA-seq datasets however, in particular if UMI
    de-duplication is possible.
 2. **Long reads** - The data presented in previous sections involved
