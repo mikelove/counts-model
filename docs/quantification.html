@@ -170,19 +170,19 @@ can be assigned to each feature, whether a gene or a transcript
 (an isoform of a gene). Alongside quantification, it is strongly
 recommended to perform quality control (QC) checks on the sequence
 files. Reports spanning multiple samples can be generated with
-the <a href="https://multiqc.info/">MultiQC</a> software <span class="citation">(Ewels et al., <a href="#ref-Ewels2016">2016</a>)</span>. Here
+the <a href="https://multiqc.info/">MultiQC</a> software <span class="citation">(Ewels et al. <a href="#ref-Ewels2016">2016</a>)</span>. Here
 I will not start with quality control checks, but instead move
 straight to quantification and import of estimated counts into R,
 although an example quality control report can be found in the
 <em>airway2</em> package on GitHub:
 <a href="https://github.com/mikelove/airway2/blob/master/inst/extdata/multiqc_report.html">MultiQC report</a>.</p>
 <p>The data I will examine first in this section is from an experiment
-of the effect of knocking down OCT4 and BRG1 in mouse embryos <span class="citation">(King and Klose, <a href="#ref-King2017">2017</a>)</span>.
+of the effect of knocking down OCT4 and BRG1 in mouse embryos <span class="citation">(King and Klose <a href="#ref-King2017">2017</a>)</span>.
 In particular, I will examine the treatment effect of knocking down OCT4.
 The experiment had four groups of samples, each replicated in
 triplicate. The RNA-seq data from the experiment is available in the
 <em>oct4</em> Bioconductor package.</p>
-<p>I will use the <em>Salmon</em> software for estimating transcript abundance <span class="citation">(Patro et al., <a href="#ref-Patro2017">2017</a>)</span>.
+<p>I will use the <em>Salmon</em> software for estimating transcript abundance <span class="citation">(Patro et al. <a href="#ref-Patro2017">2017</a>)</span>.
 Briefly, <em>Salmon</em> uses the sequenced reads and the reference transcripts,
 and constructs a generative model for the observed data, which includes
 modeling of various technical biases that are commonly observed in RNA-seq.
@@ -194,12 +194,12 @@ For details about the Salmon method and software, refer to the
 <a href="https://combine-lab.github.io/salmon/">Salmon website</a>.</p>
 <p>All 12 samples from the experiment were quantified using <em>Salmon</em>.
 The jobs for processing the reads with <em>Salmon</em> were executed via
-Snakemake <span class="citation">(Köster and Rahmann, <a href="#ref-Koster2012">2012</a>)</span>, a convenient tool for scheduling and
+Snakemake <span class="citation">(Köster and Rahmann <a href="#ref-Koster2012">2012</a>)</span>, a convenient tool for scheduling and
 executing repetitive rule-based operations on input data.
 The exact lines of code can be seen in the
 <a href="https://github.com/mikelove/oct4/blob/master/inst/scripts/Snakefile">Snakefile</a>.</p>
 <p>Most of the packages shown in this online book live within the Bioconductor
-project <span class="citation">(Huber et al., <a href="#ref-Huber2015">2015</a>)</span>. Bioconductor objects are more complex than
+project <span class="citation">(Huber et al. <a href="#ref-Huber2015">2015</a>)</span>. Bioconductor objects are more complex than
 basic objects in R, for example <em>numeric</em>, <em>character</em>, or other
 simple objects, in that they often have attached metadata, such as
 additional information about rows and columns, or other metadata.
@@ -256,7 +256,7 @@ in this section.</p>
 have the pattern <code>/&lt;DIR&gt;/quants/&lt;NAMES&gt;/quant.sf.gz</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw">all</span>(<span class="kw">file.exists</span>(coldata<span class="op">$</span>files))</a></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
-<p>I will now use the Bioconductor package <em>tximeta</em> <span class="citation">(Love et al., <a href="#ref-Love2019">2019</a>)</span> to
+<p>I will now use the Bioconductor package <em>tximeta</em> <span class="citation">(Love et al. <a href="#ref-Love2019">2019</a>)</span> to
 read in the quantification data, and create a <em>SummarizedExperiment</em>
 object. The <em>SummarizedExperiment</em> class is described in <span class="citation">Huber et al. (<a href="#ref-Huber2015">2015</a>)</span>,
 in particular diagrammed in
@@ -269,7 +269,7 @@ relevant genomic context (the genome version and chromosome names and
 lengths). <em>tximeta</em> can perform these operations by leveraging the
 hash signature of the sequence of the transcripts, which is stored
 when processing bulk RNA-seq with <em>Salmon</em>, or when processing single
-cell RNA-seq with the <em>alevin</em> software <span class="citation">(A. Srivastava, Malik, Smith, et al., <a href="#ref-Srivastava2019">2019</a>)</span>
+cell RNA-seq with the <em>alevin</em> software <span class="citation">(A. Srivastava, Malik, Smith, et al. <a href="#ref-Srivastava2019">2019</a>)</span>
 (distributed with <em>Salmon</em>).</p>
 <p>A small note: I specify <code>dropInfReps=TRUE</code>, because I will be
 performing gene-level analysis, and I won’t make use of the
@@ -277,9 +277,8 @@ uncertainty information in this first analysis. I will show
 in a later section how to make use of the inferential replicates
 computed by <em>Salmon</em> during quantification.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">library</span>(tximeta)</a></code></pre></div>
-<pre><code>## Warning: package &#39;tximeta&#39; was built under R version 3.6.2</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(SummarizedExperiment))</a></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">se &lt;-<span class="st"> </span><span class="kw">tximeta</span>(coldata, <span class="dt">dropInfReps=</span><span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(SummarizedExperiment))</a></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1">se &lt;-<span class="st"> </span><span class="kw">tximeta</span>(coldata, <span class="dt">dropInfReps=</span><span class="ot">TRUE</span>)</a></code></pre></div>
 <pre><code>## importing quantifications</code></pre>
 <pre><code>## reading in files with read_tsv</code></pre>
 <pre><code>## 1 2 3 4 5 6 7 8 9 10 11 12 
@@ -290,15 +289,15 @@ computed by <em>Salmon</em> during quantification.</p>
 ## fetching genome info for GENCODE</code></pre>
 <p>In the above output, we can see that <code>tximeta</code> identified that
 the mouse reference transcripts, release M20, were used from
-GENCODE <span class="citation">(Frankish et al., <a href="#ref-GENCODE">2018</a>)</span>. This information would be automatically
+GENCODE <span class="citation">(Frankish, GENCODE-consoritum, and Flicek <a href="#ref-GENCODE">2018</a>)</span>. This information would be automatically
 identified, even if the group that performed the quantification
 did not document this when uploading processed expression data to a
 public repository.</p>
 <p>We can see the matrices of data that have been compiled, and
 examine the genomic locations of the features (rows):</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1"><span class="kw">assayNames</span>(se)</a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">assayNames</span>(se)</a></code></pre></div>
 <pre><code>## [1] &quot;counts&quot;    &quot;abundance&quot; &quot;length&quot;</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1"><span class="kw">rowRanges</span>(se)</a></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1"><span class="kw">rowRanges</span>(se)</a></code></pre></div>
 <pre><code>## GRanges object with 137271 ranges and 3 metadata columns:
 ##                        seqnames          ranges strand |
 ##                           &lt;Rle&gt;       &lt;IRanges&gt;  &lt;Rle&gt; |
@@ -348,7 +347,7 @@ object, I can obtain additional information, such as the
 correspondence of transcripts to genes. I can then perform a
 summarization task, without having to look up this information
 manually.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" data-line-number="1">gse &lt;-<span class="st"> </span><span class="kw">summarizeToGene</span>(se)</a></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1">gse &lt;-<span class="st"> </span><span class="kw">summarizeToGene</span>(se)</a></code></pre></div>
 <pre><code>## loading existing TxDb created: 2019-07-01 19:31:02</code></pre>
 <pre><code>## obtaining transcript-to-gene mapping from TxDb</code></pre>
 <pre><code>## loading existing gene ranges created: 2019-07-01 19:32:20</code></pre>
@@ -356,7 +355,7 @@ manually.</p>
 <pre><code>## summarizing counts</code></pre>
 <pre><code>## summarizing length</code></pre>
 <p>Gene-level summarization of transcript-level quantification data
-is described in the paper for <em>tximport</em> <span class="citation">(Soneson et al., <a href="#ref-Soneson2015">2015</a>)</span>.
+is described in the paper for <em>tximport</em> <span class="citation">(Soneson, Love, and Robinson <a href="#ref-Soneson2015">2015</a>)</span>.
 The <code>tximeta</code> function internally calls methods from the
 <em>tximport</em> package during its operation. Note that <em>tximport</em>
 provides similar functionality to <em>tximeta</em>, but instead of
@@ -369,8 +368,8 @@ subset the genes (rows) based on overlaps with a given genomic range
 using standard square bracket indexing. The range-based
 class system and set of methods for operating on genomic ranges
 is provided by the <em>GenomicRanges</em> package, which has useful
-help pages and vignettes <span class="citation">(Lawrence et al., <a href="#ref-Lawrence2013">2013</a>)</span>.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb26-1" data-line-number="1"><span class="kw">rowRanges</span>(gse)</a></code></pre></div>
+help pages and vignettes <span class="citation">(Lawrence et al. <a href="#ref-Lawrence2013">2013</a>)</span>.</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb25-1" data-line-number="1"><span class="kw">rowRanges</span>(gse)</a></code></pre></div>
 <pre><code>## GRanges object with 53697 ranges and 1 metadata column:
 ##                         seqnames              ranges strand |
 ##                            &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; |
@@ -400,8 +399,8 @@ help pages and vignettes <span class="citation">(Lawrence et al., <a href="#ref-
 ##    ENSMUSG00000117655.1  ENSMUSG00000117655.1
 ##   -------
 ##   seqinfo: 22 sequences (1 circular) from mm10 genome</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb28-1" data-line-number="1">x &lt;-<span class="st"> </span><span class="kw">GRanges</span>(<span class="st">&quot;chr1&quot;</span>, <span class="kw">IRanges</span>(<span class="fl">10e6</span>, <span class="fl">11e6</span>))</a>
-<a class="sourceLine" id="cb28-2" data-line-number="2">gse[gse <span class="op">%over%</span><span class="st"> </span>x, ]</a></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb27-1" data-line-number="1">x &lt;-<span class="st"> </span><span class="kw">GRanges</span>(<span class="st">&quot;chr1&quot;</span>, <span class="kw">IRanges</span>(<span class="fl">10e6</span>, <span class="fl">11e6</span>))</a>
+<a class="sourceLine" id="cb27-2" data-line-number="2">gse[gse <span class="op">%over%</span><span class="st"> </span>x, ]</a></code></pre></div>
 <pre><code>## class: RangedSummarizedExperiment 
 ## dim: 18 12 
 ## metadata(6): tximetaInfo quantInfo ... txomeInfo txdbInfo
@@ -416,7 +415,7 @@ help pages and vignettes <span class="citation">(Lawrence et al., <a href="#ref-
 the <code>colData</code> columns, e.g. <code>colData(gse)$line</code>.
 A shortcut for referring to <code>colData</code> columns is to just use
 the dollar sign directly on the object, <code>gse$line</code>.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb30-1" data-line-number="1">gse[, gse<span class="op">$</span>line <span class="op">==</span><span class="st"> &quot;OCT4&quot;</span>]</a></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb29-1" data-line-number="1">gse[, gse<span class="op">$</span>line <span class="op">==</span><span class="st"> &quot;OCT4&quot;</span>]</a></code></pre></div>
 <pre><code>## class: RangedSummarizedExperiment 
 ## dim: 53697 6 
 ## metadata(6): tximetaInfo quantInfo ... txomeInfo txdbInfo
@@ -433,8 +432,8 @@ identifiers, making use of the organism annotation packages
 in Bioconductor. For example, to add gene symbols, I can
 use <em>tximeta</em>’s <code>addIds</code> function, and specify the <code>SYMBOL</code>
 column.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb32-1" data-line-number="1"><span class="kw">library</span>(org.Mm.eg.db)</a>
-<a class="sourceLine" id="cb32-2" data-line-number="2">gse &lt;-<span class="st"> </span><span class="kw">addIds</span>(gse, <span class="dt">column=</span><span class="st">&quot;SYMBOL&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb31-1" data-line-number="1"><span class="kw">library</span>(org.Mm.eg.db)</a>
+<a class="sourceLine" id="cb31-2" data-line-number="2">gse &lt;-<span class="st"> </span><span class="kw">addIds</span>(gse, <span class="dt">column=</span><span class="st">&quot;SYMBOL&quot;</span>)</a></code></pre></div>
 <pre><code>## mapping to new IDs using &#39;org.Mm.eg.db&#39; data package
 ## if all matching IDs are desired, and &#39;1:many mappings&#39; are reported,
 ## set multiVals=&#39;list&#39; to obtain all the matching IDs</code></pre>
@@ -443,7 +442,7 @@ column.</p>
 ## columns</code></pre>
 <p>To check all the available columns for an organism package,
 use the <code>columns</code> function:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb36-1" data-line-number="1"><span class="kw">columns</span>(org.Mm.eg.db)</a></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb35-1" data-line-number="1"><span class="kw">columns</span>(org.Mm.eg.db)</a></code></pre></div>
 <pre><code>##  [1] &quot;ACCNUM&quot;       &quot;ALIAS&quot;        &quot;ENSEMBL&quot;      &quot;ENSEMBLPROT&quot; 
 ##  [5] &quot;ENSEMBLTRANS&quot; &quot;ENTREZID&quot;     &quot;ENZYME&quot;       &quot;EVIDENCE&quot;    
 ##  [9] &quot;EVIDENCEALL&quot;  &quot;GENENAME&quot;     &quot;GO&quot;           &quot;GOALL&quot;       
@@ -455,34 +454,34 @@ use the <code>columns</code> function:</p>
 <h3> References</h3>
 <div id="refs" class="references">
 <div id="ref-Ewels2016">
-<p>Ewels, P., Magnusson, M., Lundin, S., and Käller, M. (2016). MultiQC: summarize analysis results for multiple tools and samples in a single report. <em>Bioinformatics</em>, <em>32</em>(19), 3047–3048.</p>
+<p>Ewels, Philip, Måns Magnusson, Sverker Lundin, and Max Käller. 2016. “MultiQC: summarize analysis results for multiple tools and samples in a single report.” <em>Bioinformatics</em> 32 (19): 3047–8. <a href="https://doi.org/10.1093/bioinformatics/btw354">https://doi.org/10.1093/bioinformatics/btw354</a>.</p>
 </div>
 <div id="ref-GENCODE">
-<p>Frankish, A., GENCODE-consoritum, and Flicek, P. (2018). GENCODE reference annotation for the human and mouse genomes. <em>Nucleic Acids Research</em>.</p>
+<p>Frankish, A, GENCODE-consoritum, and P Flicek. 2018. “GENCODE reference annotation for the human and mouse genomes.” <em>Nucleic Acids Research</em>. <a href="https://doi.org/10.1093/nar/gky955">https://doi.org/10.1093/nar/gky955</a>.</p>
 </div>
 <div id="ref-Huber2015">
-<p>Huber, W., Carey, V. J., Gentleman, R., Anders, S., Carlson, M., Carvalho, B. S., … Morgan, M. (2015). Orchestrating high-throughput genomic analysis with Bioconductor. <em>Nature Methods</em>, <em>12</em>(2), 115–121.</p>
+<p>Huber, Wolfgang, Vincent J. Carey, Robert Gentleman, Simon Anders, Marc Carlson, Benilton S. Carvalho, Hector C. Bravo, et al. 2015. “Orchestrating high-throughput genomic analysis with Bioconductor.” <em>Nature Methods</em> 12 (2): 115–21. <a href="https://doi.org/10.1038/nmeth.3252">https://doi.org/10.1038/nmeth.3252</a>.</p>
 </div>
 <div id="ref-King2017">
-<p>King, H. W., and Klose, R. J. (2017). The pioneer factor oct4 requires the chromatin remodeller brg1 to support gene regulatory element function in mouse embryonic stem cells. <em>eLife</em>, <em>6</em>, e22631.</p>
+<p>King, Hamish W, and Robert J Klose. 2017. “The Pioneer Factor Oct4 Requires the Chromatin Remodeller Brg1 to Support Gene Regulatory Element Function in Mouse Embryonic Stem Cells.” Edited by Irwin Davidson. <em>eLife</em> 6 (March): e22631. <a href="https://doi.org/10.7554/eLife.22631">https://doi.org/10.7554/eLife.22631</a>.</p>
 </div>
 <div id="ref-Koster2012">
-<p>Köster, J., and Rahmann, S. (2012). Snakemake—a scalable bioinformatics workflow engine. <em>Bioinformatics</em>, <em>28</em>(19), 2520–2522.</p>
+<p>Köster, Johannes, and Sven Rahmann. 2012. “Snakemake—a Scalable Bioinformatics Workflow Engine.” <em>Bioinformatics</em> 28 (19). Oxford University Press: 2520–2. <a href="https://doi.org/10.1093/bioinformatics/bts480">https://doi.org/10.1093/bioinformatics/bts480</a>.</p>
 </div>
 <div id="ref-Lawrence2013">
-<p>Lawrence, M., Huber, W., Pagès, H., Aboyoun, P., Carlson, M., Gentleman, R., … Carey, V. J. (2013). Software for Computing and Annotating Genomic Ranges. <em>PLoS Computational Biology</em>, <em>9</em>(8), e1003118+.</p>
+<p>Lawrence, Michael, Wolfgang Huber, Hervé Pagès, Patrick Aboyoun, Marc Carlson, Robert Gentleman, Martin T. Morgan, and Vincent J. Carey. 2013. “Software for Computing and Annotating Genomic Ranges.” Edited by Andreas Prlic. <em>PLoS Computational Biology</em> 9 (8). Public Library of Science: e1003118+. <a href="https://doi.org/10.1371/journal.pcbi.1003118">https://doi.org/10.1371/journal.pcbi.1003118</a>.</p>
 </div>
 <div id="ref-Love2019">
-<p>Love, M. I., Soneson, C., Hickey, P. F., Johnson, L. K., Pierce, N. T., Shepherd, L., … Patro, R. (2019). Tximeta: reference sequence checksums for provenance identification in RNA-seq. <em>bioRxiv</em>.</p>
+<p>Love, Michael I., Charlotte Soneson, Peter F. Hickey, Lisa K. Johnson, N. Tessa Pierce, Lori Shepherd, Martin Morgan, and Rob Patro. 2019. “Tximeta: reference sequence checksums for provenance identification in RNA-seq.” <em>bioRxiv</em>. <a href="https://doi.org/10.1101/777888">https://doi.org/10.1101/777888</a>.</p>
 </div>
 <div id="ref-Patro2017">
-<p>Patro, R., Duggal, G., Love, M., Irizarry, R., and Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. <em>Nature Methods</em>, <em>14</em>, 417–419.</p>
+<p>Patro, R, G Duggal, MI Love, RA Irizarry, and C Kingsford. 2017. “Salmon Provides Fast and Bias-Aware Quantification of Transcript Expression.” <em>Nature Methods</em> 14: 417–19. <a href="https://doi.org/10.1038/nmeth.4197">https://doi.org/10.1038/nmeth.4197</a>.</p>
 </div>
 <div id="ref-Soneson2015">
-<p>Soneson, C., Love, M. I., and Robinson, M. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. <em>F1000Research</em>, <em>4</em>(1521).</p>
+<p>Soneson, Charlotte, Michael I. Love, and Mark Robinson. 2015. “Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences.” <em>F1000Research</em> 4 (1521). <a href="https://doi.org/10.12688/f1000research.7563">https://doi.org/10.12688/f1000research.7563</a>.</p>
 </div>
 <div id="ref-Srivastava2019">
-<p>Srivastava, A., Malik, L., Smith, T. S., Sudbery, I., and Patro, R. (2019). Alevin efficiently estimates accurate gene abundances from dscRNA-seq data. <em>Genome Biology</em>, <em>20</em>(65).</p>
+<p>Srivastava, Avi, Laraib Malik, Tom Sean Smith, Ian Sudbery, and Rob Patro. 2019. “Alevin efficiently estimates accurate gene abundances from dscRNA-seq data.” <em>Genome Biology</em> 20 (65). <a href="https://doi.org/10.1186/s13059-019-1670-y">https://doi.org/10.1186/s13059-019-1670-y</a>.</p>
 </div>
 </div>
             </section>
