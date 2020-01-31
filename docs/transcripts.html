@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Transcript expression | Statistical Modeling of High Dimensional Counts</title>
+  <meta name="description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
+  <meta name="generator" content="bookdown 0.16 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Transcript expression | Statistical Modeling of High Dimensional Counts" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Transcript expression | Statistical Modeling of High Dimensional Counts" />
+  
+  <meta name="twitter:description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
+  
+
+<meta name="author" content="Michael I. Love" />
+
+
+<meta name="date" content="2020-01-31" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="model.html"/>
+<link rel="next" href="limits.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stat. Model. of High Dim. Counts</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>About this online book</a></li>
+<li class="chapter" data-level="1" data-path="quantification.html"><a href="quantification.html"><i class="fa fa-check"></i><b>1</b> Quantification</a></li>
+<li class="chapter" data-level="2" data-path="model.html"><a href="model.html"><i class="fa fa-check"></i><b>2</b> Counts modeling</a><ul>
+<li class="chapter" data-level="2.1" data-path="model.html"><a href="model.html#a-first-exploration-of-counts"><i class="fa fa-check"></i><b>2.1</b> A first exploration of counts</a></li>
+<li class="chapter" data-level="2.2" data-path="model.html"><a href="model.html#modeling-counts-with-deseq2"><i class="fa fa-check"></i><b>2.2</b> Modeling counts with DESeq2</a></li>
+<li class="chapter" data-level="2.3" data-path="model.html"><a href="model.html#hypothesis-weighting"><i class="fa fa-check"></i><b>2.3</b> Hypothesis weighting</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="transcripts.html"><a href="transcripts.html"><i class="fa fa-check"></i><b>3</b> Transcript expression</a></li>
+<li class="chapter" data-level="4" data-path="limits.html"><a href="limits.html"><i class="fa fa-check"></i><b>4</b> Limitations and extensions</a></li>
+<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Session information</a></li>
+<li class="chapter" data-level="6" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>6</b> References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Statistical Modeling of High Dimensional Counts</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="transcripts" class="section level1">
+<h1><span class="header-section-number">Chapter 3</span> Transcript expression</h1>
+<p>In the previous chapters, I showed importing transcript-level data
+with <em>tximeta</em>, summarizing the data to gene-level counts, and
+modeling the gene-level counts with <em>DESeq2</em>. Now I return to
+transcript-level data and demonstrate how we can perform statistical
+testing on transcripts, that is, across all the isoforms of all the
+genes. There are two important aspects to consider when performing
+transcript-level analysis:</p>
+<ol style="list-style-type: decimal">
+<li>Uncertainty - Because the isoforms of a gene often have a
+considerable amount of sequence similarity resulting from shared
+exons, and because short read RNA-seq protocols involve generating
+fragments that do not span the entire transcript, there can be
+considerable uncertainty in assigning a given fragment to a particular
+transcript (see next chapter for a discussion of long read protocols).
+The uncertainty is not constant across the transcripts,
+and depends on many factors, some inherent to the gene model, such
+as the size of the alternative exons, and some inherent to the
+experiment, such as the sequencing depth, fragment length, read
+length, and technical biases producing non-uniform coverage.</li>
+<li>Isoform switching - We may perform testing for differential
+<em>expression</em> of each transcript (I will perform this analysis in
+this chapter), or we may also consider testing whether the <em>usage</em> of
+the isoforms within a gene changes across condition. The latter
+question is often termed <em>differential transcript usage</em> (DTU), and
+can be related to <em>differential transcript expression</em> (DTE), but
+they are not identical questions. For example, if all of the
+isoforms of a gene increase in their expression across condition
+with equal fold change, this is an example of differential gene
+expression (DGE) and DTE, but not DTU, as the proportions of the
+individual isoforms did not change.</li>
+</ol>
+<p>Regarding isoform switching, one reference which explores Bioconductor
+packages that can be used to detect DTU is the <em>rnaseqDTU</em>
+Bioconductor workflow <span class="citation">(Love et al., <a href="#ref-Love2018">2018</a>)</span>. This workflow
+demonstrates optimal filtering techniques <span class="citation">(Soneson et al., <a href="#ref-Soneson2016">2016</a>)</span>, how the
+methods <em>DEXSeq</em> <span class="citation">(Anders et al., <a href="#ref-Anders2012">2012</a>)</span> and <em>DRIMSeq</em> <span class="citation">(Nowicka and Robinson, <a href="#ref-Nowicka2016">2016</a>)</span> can be
+applied to estimated transcript counts, and how <em>stageR</em>
+<span class="citation">(Van den Berge et al., <a href="#ref-VanDenBerge2017">2017</a>)</span> can be utilized to detect which genes and which
+isoforms contain evidence of DTU while controlling overall error rates.</p>
+<p>I will first introduce the experimental data, and then discuss various
+approaches used to analyze transcript-level data. I will load some
+processed RNA-seq data from an experiment by <span class="citation">Alasoo et al. (<a href="#ref-Alasoo2018">2018</a>)</span>, a subset of
+which is available in the <em>macrophage</em> Biconductor package. The
+experiment involved measuring transcription in macrophage cell lines
+from a number of human donors, both untreated, as well as treated with
+IFNg, <em>Salmonella</em>, and IFNg combined with <em>Salmonella</em>. Here I will
+focus on the samples that were untreated and treated with IFNg. As
+each cell line was from a human donor, I will also control
+for a baseline donor effect when comparing across treatment.</p>
+<p>The <em>macrophage</em> dataset has paired samples from 6 of the donors (all
+female), and has been quantified using <em>Salmon</em>. One unique aspect of
+<em>Salmon</em> is that it allows for GC bias correction at the fragment
+level during quantification, which is critical for reliable
+identification of the correct expressed isoform in experiments that
+have non-uniform coverage along the transcripts
+<span class="citation">(Love et al., <a href="#ref-Love2016Modeling">2016</a>; Patro et al., <a href="#ref-Patro2017">2017</a>)</span>.</p>
+<p>Here I will perform differential transcript expression (DTE)
+analysis. A key aspect, compared to gene-level analysis, is that there
+is much more uncertainty in the assignments of fragments to
+transcripts. A number of statistical methods have been proposed to
+take this measurement uncertainty into account when performing
+downstream testing, including <em>BitSeq</em> <span class="citation">(Glaus et al., <a href="#ref-Glaus2012">2012</a>)</span>, <em>mmdiff</em>
+<span class="citation">(Turro et al., <a href="#ref-Turro2013">2013</a>)</span>, <em>IsoDE</em> <span class="citation">(Al Seesi et al., <a href="#ref-AlSeesi2014">2014</a>)</span>, and <em>Sleuth</em> <span class="citation">(Pimentel et al., <a href="#ref-Pimentel2017">2017</a>)</span>,
+the latter which leverages bootstrap quantification estimates from the
+<em>kallisto</em> <span class="citation">(Bray et al., <a href="#ref-Bray2016">2016</a>)</span> quantification method. These methods
+incorporate measurement uncertainty into parametric models for
+differential expression where biological variability is also modeled.
+The exception is <em>IsoDE</em> which compares bootstrap distributions of
+transcript expression for two samples at a time.</p>
+<p>Here, I will use a nonparametric method that takes into account both
+inferential uncertainty of fragment assignments, as well as biological
+variability across samples, called <em>Swish</em> <span class="citation">(Zhu et al., <a href="#ref-Zhu2019">2019</a>)</span>, which is
+available in the <em>fishpond</em> Bioconductor package. <em>Swish</em> stands for
+“SAMseq With Inferential Samples Helps”, as it is based on the
+existing statistical method for differential gene expression, <em>SAMseq</em>
+<span class="citation">(Li and Tibshirani, <a href="#ref-Li2011">2011</a>)</span>. The key idea is to make use of nonparametric testing
+methods such as the Mann-Whitney Wilcoxon statistic, which operate
+only on the ranks of the data across samples. The original <em>SAMseq</em>
+method performed resampling of the counts in order to account for
+sequencing depth differences. Here, <em>Swish</em> will make use of multiple
+values in each cell of the count matrix that were computed by the
+<em>Salmon</em> software, using a technique called Gibbs sampling. For more
+details on the Gibbs sampling procedure, consult the publication of
+<em>Salmon</em> <span class="citation">(Patro et al., <a href="#ref-Patro2017">2017</a>)</span> and <em>mmseq</em> <span class="citation">(Turro et al., <a href="#ref-Turro2011">2011</a>)</span>. Finally, the false
+discovery rate of the test statistics averaged over the multiple
+versions (or “inferential replicates”) of the counts matrix is
+computed via a permutation technique <span class="citation">(Storey and Tibshirani, <a href="#ref-Storey2003">2003</a>)</span>.</p>
+<p>I begin by locating the files in the <em>macrophage</em> package. As before,
+this step is not useful for a typical RNA-seq workflow, as the data
+will not be contained in an R package, but contained in some directory
+on a server or compute cluster. In lieu of the <code>system.file</code> command
+below, you should just specify the <code>dir</code> variable to be a path to the
+files, e.g. <code>/path/to/data/dir</code>.</p>
+<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb85-1" data-line-number="1">dir &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="dt">package=</span><span class="st">&quot;macrophage&quot;</span>)</a>
+<a class="sourceLine" id="cb85-2" data-line-number="2"><span class="kw">list.files</span>(dir)</a></code></pre></div>
+<pre><code>## [1] &quot;coldata.csv&quot;                  
+## [2] &quot;errs&quot;                         
+## [3] &quot;gencode.v29_salmon_0.12.0&quot;    
+## [4] &quot;gencode.v29.annotation.gtf.gz&quot;
+## [5] &quot;PRJEB18997.txt&quot;               
+## [6] &quot;quants&quot;                       
+## [7] &quot;supp_table_1.csv&quot;             
+## [8] &quot;supp_table_7.csv&quot;</code></pre>
+<p>I then read in the sample table, and use <em>dplyr</em> to select certain
+columns, convert columns into factors, and add a new column pointing
+to the quantification files.</p>
+<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" data-line-number="1"><span class="kw">library</span>(readr)</a>
+<a class="sourceLine" id="cb87-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb87-3" data-line-number="3">coldata &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">file.path</span>(dir,<span class="st">&quot;coldata.csv&quot;</span>))</a></code></pre></div>
+<pre><code>## Parsed with column specification:
+## cols(
+##   names = col_character(),
+##   sample_id = col_character(),
+##   line_id = col_character(),
+##   replicate = col_double(),
+##   condition_name = col_character(),
+##   macrophage_harvest = col_character(),
+##   salmonella_date = col_character(),
+##   ng_ul_mean = col_double(),
+##   rna_extraction = col_character(),
+##   rna_submit = col_character(),
+##   library_pool = col_character(),
+##   chemistry = col_character(),
+##   rna_auto = col_double()
+## )</code></pre>
+<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" data-line-number="1">lvls &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;naive&quot;</span>,<span class="st">&quot;IFNg&quot;</span>,<span class="st">&quot;SL1344&quot;</span>,<span class="st">&quot;IFNg_SL1344&quot;</span>)</a>
+<a class="sourceLine" id="cb89-2" data-line-number="2">coldata &lt;-<span class="st"> </span>coldata <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb89-3" data-line-number="3"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(names, <span class="dt">id=</span>sample_id, <span class="dt">line=</span>line_id, </a>
+<a class="sourceLine" id="cb89-4" data-line-number="4">                <span class="dt">condition=</span>condition_name) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb89-5" data-line-number="5"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">line=</span><span class="kw">factor</span>(line),</a>
+<a class="sourceLine" id="cb89-6" data-line-number="6">         <span class="dt">condition=</span><span class="kw">factor</span>(condition, <span class="dt">levels=</span>lvls),</a>
+<a class="sourceLine" id="cb89-7" data-line-number="7">         <span class="dt">files=</span><span class="kw">file.path</span>(dir, <span class="st">&quot;quants&quot;</span>, names, <span class="st">&quot;quant.sf.gz&quot;</span>))</a></code></pre></div>
+<p>I will only consider for this demonstration the untreated and IFNg
+treated samples:</p>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" data-line-number="1">coldata &lt;-<span class="st"> </span>coldata <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(condition <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;naive&quot;</span>,<span class="st">&quot;IFNg&quot;</span>))</a>
+<a class="sourceLine" id="cb90-2" data-line-number="2">coldata<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">droplevels</span>(coldata<span class="op">$</span>condition)</a></code></pre></div>
+<p>The <code>coldata</code> sample table now looks like:</p>
+<div class="sourceCode" id="cb91"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb91-1" data-line-number="1"><span class="kw">head</span>(coldata)</a></code></pre></div>
+<pre><code>## # A tibble: 6 x 5
+##   names     id     line  condition files                         
+##   &lt;chr&gt;     &lt;chr&gt;  &lt;fct&gt; &lt;fct&gt;     &lt;chr&gt;                         
+## 1 SAMEA103… diku_A diku… naive     /Library/Frameworks/R.framewo…
+## 2 SAMEA103… diku_B diku… IFNg      /Library/Frameworks/R.framewo…
+## 3 SAMEA103… eiwy_A eiwy… naive     /Library/Frameworks/R.framewo…
+## 4 SAMEA103… eiwy_B eiwy… IFNg      /Library/Frameworks/R.framewo…
+## 5 SAMEA103… fikt_A fikt… naive     /Library/Frameworks/R.framewo…
+## 6 SAMEA103… fikt_B fikt… IFNg      /Library/Frameworks/R.framewo…</code></pre>
+<p>Test that all the files exist as I specified:</p>
+<div class="sourceCode" id="cb93"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb93-1" data-line-number="1"><span class="kw">all</span>(<span class="kw">file.exists</span>(coldata<span class="op">$</span>files))</a></code></pre></div>
+<pre><code>## [1] TRUE</code></pre>
+<p>As before, I use <em>tximeta</em> to read in the quantification data. This
+time I do not set <code>dropInfReps=TRUE</code>, as I will need the inferential
+replicates created by <em>Salmon</em> to perform DTE with <em>Swish</em>. The
+inferential replicates allows the analysis to take into account the
+uncertainty of fragment assignment to transcripts.</p>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" data-line-number="1"><span class="kw">library</span>(tximeta)</a>
+<a class="sourceLine" id="cb95-2" data-line-number="2"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(SummarizedExperiment))</a>
+<a class="sourceLine" id="cb95-3" data-line-number="3">y &lt;-<span class="st"> </span><span class="kw">tximeta</span>(coldata)</a></code></pre></div>
+<pre><code>## importing quantifications</code></pre>
+<pre><code>## reading in files with read_tsv</code></pre>
+<pre><code>## 1 2 3 4 5 6 7 8 9 10 11 12 
+## found matching linked transcriptome:
+## [ GENCODE - Homo sapiens - release 29 ]
+## loading existing TxDb created: 2019-02-11 14:22:51
+## loading existing transcript ranges created: 2019-05-31 20:37:15
+## fetching genome info for GENCODE</code></pre>
+<p>For speed of the demonstration, I subset to only the transcripts on
+chromosome 1 (this would not be recommended for a typical analysis).</p>
+<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" data-line-number="1">y &lt;-<span class="st"> </span>y[<span class="kw">seqnames</span>(y) <span class="op">==</span><span class="st"> &quot;chr1&quot;</span>,]</a></code></pre></div>
+<p>I load the <em>fishpond</em> package, which contains the methods for running
+<em>Swish</em>. There are three basic steps: scaling of the inferential
+replicates to make them comparable despite different sequencing depth,
+filtering out lowly expressed transcripts, and the testing itself. The
+scaling method by default uses the median ratio method of <em>DESeq</em>
+<span class="citation">(Anders and Huber, <a href="#ref-Anders2010">2010</a>)</span>. The <code>labelKeep</code> function by default will keep those
+transcripts with 3 or more samples with a count of 10 or higher. For
+scRNA-seq with UMI de-duplication, it is recommended to lower the
+minimal count to a lower value such as 3. The minimal number of
+samples can be increased for experiments with many samples.</p>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1"><span class="kw">library</span>(fishpond)</a></code></pre></div>
+<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb101-1" data-line-number="1">y &lt;-<span class="st"> </span><span class="kw">scaleInfReps</span>(y, <span class="dt">quiet=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb101-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw">labelKeep</span>(y)</a>
+<a class="sourceLine" id="cb101-3" data-line-number="3">y &lt;-<span class="st"> </span>y[<span class="kw">mcols</span>(y)<span class="op">$</span>keep,]</a></code></pre></div>
+<p>Because the method makes use of permutations, it is required to set a
+seed for computational reproducibility. I specify to test across the
+<code>condition</code> variable, while controlling for a pairing variable
+<code>line</code>. The <code>line</code> variable indicates which donor the cell line came
+from.</p>
+<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb102-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw">swish</span>(y, <span class="dt">x=</span><span class="st">&quot;condition&quot;</span>, <span class="dt">pair=</span><span class="st">&quot;line&quot;</span>, <span class="dt">quiet=</span><span class="ot">TRUE</span>)</a></code></pre></div>
+<p>After running <code>swish</code>, all of the results are stored in the metadata
+columns (<code>mcols</code>) of the object <code>y</code>. I look to see how many
+transcripts have a small q-value (analogous to an adjusted p-value,
+this should provide a set with a nominal FDR control).</p>
+<div class="sourceCode" id="cb103"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb103-1" data-line-number="1"><span class="kw">names</span>(<span class="kw">mcols</span>(y))</a></code></pre></div>
+<pre><code>##  [1] &quot;tx_id&quot;     &quot;gene_id&quot;   &quot;tx_name&quot;   &quot;log10mean&quot; &quot;keep&quot;     
+##  [6] &quot;stat&quot;      &quot;log2FC&quot;    &quot;pvalue&quot;    &quot;locfdr&quot;    &quot;qvalue&quot;</code></pre>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" data-line-number="1"><span class="kw">table</span>(<span class="kw">mcols</span>(y)<span class="op">$</span>qvalue <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>)</a></code></pre></div>
+<pre><code>## 
+## FALSE  TRUE 
+##  5081  1329</code></pre>
+<p>One important aspect in testing across many features, in particular
+where the uncertainty level is so heterogeneous, is to consider if the
+p-value distribution is roughly uniform, with the exception of the
+rejected tests. Here <em>Swish</em> provides a roughly uniform distribution,
+with a spike on the left side representing the rejections of the null
+hypothesis.</p>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb107-1" data-line-number="1"><span class="kw">hist</span>(<span class="kw">mcols</span>(y)<span class="op">$</span>pvalue, <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>,</a>
+<a class="sourceLine" id="cb107-2" data-line-number="2">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;p-values&quot;</span>)</a></code></pre></div>
+<p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/swish-hist-1.png" width="672" /></p>
+<p>As with <em>DESeq2</em> I can make an MA-plot, with the differential
+transcripts highlighted in blue (here at 5% FDR).</p>
+<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" data-line-number="1"><span class="kw">plotMASwish</span>(y, <span class="dt">alpha=</span>.<span class="dv">05</span>)</a></code></pre></div>
+<p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/swish-ma-1.png" width="672" /></p>
+<p>I can also examine individual transcripts with evidence of
+differential expression. As each sample is represented by a
+distribution of possible estimated counts from <em>Salmon</em>, <em>Swish</em> uses
+boxplots to represent the differences in expression across samples:</p>
+<div class="sourceCode" id="cb109"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb109-1" data-line-number="1">idx &lt;-<span class="st"> </span><span class="kw">with</span>(<span class="kw">mcols</span>(y), <span class="kw">which</span>(pvalue <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span> <span class="op">&amp;</span><span class="st"> </span>log2FC <span class="op">&gt;</span><span class="st"> </span><span class="dv">4</span>))</a>
+<a class="sourceLine" id="cb109-2" data-line-number="2"><span class="kw">plotInfReps</span>(y, idx[<span class="dv">1</span>], <span class="dt">x=</span><span class="st">&quot;condition&quot;</span>, <span class="dt">cov=</span><span class="st">&quot;line&quot;</span>, <span class="dt">xaxis=</span><span class="ot">FALSE</span>)</a></code></pre></div>
+<p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/swish-counts-1.png" width="672" /></p>
+<p>This chapter gives a basic introduction to DTE using nonparametric
+testing with the <em>Swish</em> method. For more details on transcript-level
+analysis, it is recommended to consult the <em>fishpond</em> Bioconductor
+package vignette, or the <em>rnaseqDTU</em> workflow on Bioconductor
+<span class="citation">(Love et al., <a href="#ref-Love2018">2018</a>)</span>.</p>
+
+</div>
+<h3> References</h3>
+<div id="refs" class="references">
+<div id="ref-Alasoo2018">
+<p>Alasoo, K., Rodrigues, J., Mukhopadhyay, S., Knights, A., Mann, A., Kundu, K., … Gaffney, D. (2018). Shared genetic effects on chromatin and gene expression indicate a role for enhancer priming in immune response. <em>Nature Genetics</em>, <em>50</em>, 424–431.</p>
+</div>
+<div id="ref-AlSeesi2014">
+<p>Al Seesi, S., Temate-Tiagueu, Y., Zelikovsky, A., and Măndoiu, I. I. (2014). Bootstrap-based differential gene expression analysis for RNA-Seq data with and without replicates. <em>BMC Genomics</em>, <em>15</em>(Suppl 8).</p>
+</div>
+<div id="ref-Anders2010">
+<p>Anders, S., and Huber, W. (2010). Differential expression analysis for sequence count data. <em>Genome Biology</em>, <em>11</em>, R106.</p>
+</div>
+<div id="ref-Anders2012">
+<p>Anders, S., Reyes, A., and Huber, W. (2012). Detecting differential usage of exons from RNA-seq data. <em>Genome Research</em>, <em>22</em>(10), 2008–2017.</p>
+</div>
+<div id="ref-Bray2016">
+<p>Bray, N. L., Pimentel, H., Melsted, P., and Pachter, L. (2016). Near-optimal probabilistic RNA-seq quantification. <em>Nature Biotechnology</em>, <em>34</em>(5), 525.</p>
+</div>
+<div id="ref-Glaus2012">
+<p>Glaus, P., Honkela, A., and Rattray, M. (2012). Identifying differentially expressed transcripts from RNA-seq data with biological variation. <em>Bioinformatics</em>, <em>28</em>(13).</p>
+</div>
+<div id="ref-Li2011">
+<p>Li, J., and Tibshirani, R. (2011). Finding consistent patterns: A nonparametric approach for identifying differential expression in RNA-Seq data. <em>Statistical Methods in Medical Research</em>, <em>22</em>(5), 519–536.</p>
+</div>
+<div id="ref-Love2016Modeling">
+<p>Love, M. I., Hogenesch, J. B., and Irizarry, R. A. (2016). Modeling of rna-seq fragment sequence bias reduces systematic errors in transcript abundance estimation. <em>Nature Biotechnology</em>, <em>34</em>(12), 1287–1291.</p>
+</div>
+<div id="ref-Love2018">
+<p>Love, M., Soneson, C., and Patro, R. (2018). Swimming downstream: Statistical analysis of differential transcript usage following salmon quantification. <em>F1000Research</em>, <em>7</em>(952).</p>
+</div>
+<div id="ref-Nowicka2016">
+<p>Nowicka, M., and Robinson, M. (2016). DRIMSeq: a Dirichlet-multinomial framework for multivariate count outcomes in genomics. <em>F1000Research</em>, <em>5</em>(1356).</p>
+</div>
+<div id="ref-Patro2017">
+<p>Patro, R., Duggal, G., Love, M., Irizarry, R., and Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. <em>Nature Methods</em>, <em>14</em>, 417–419.</p>
+</div>
+<div id="ref-Pimentel2017">
+<p>Pimentel, H., Bray, N. L., Puente, S., Melsted, P., and Pachter, L. (2017). Differential analysis of RNA-seq incorporating quantification uncertainty. <em>Nature Methods</em>, <em>14</em>(7), 687–690.</p>
+</div>
+<div id="ref-Soneson2016">
+<p>Soneson, C., Matthes, K. L., Nowicka, M., Law, C. W., and Robinson, M. D. (2016). Isoform prefiltering improves performance of count-based methods for analysis of differential transcript usage. <em>Genome Biology</em>, <em>17</em>(1), 12.</p>
+</div>
+<div id="ref-Storey2003">
+<p>Storey, J., and Tibshirani, R. (2003).  Statistical significance for genome-wide experiments. <em>Proceedings of the National Academy of Sciences</em>, <em>100</em>(16), 9440–9445.</p>
+</div>
+<div id="ref-Turro2013">
+<p>Turro, E., Astle, W. J., and Tavaré, S. (2013). Flexible analysis of RNA-seq data using mixed effects models. <em>Bioinformatics</em>, <em>30</em>(2), 180–188.</p>
+</div>
+<div id="ref-Turro2011">
+<p>Turro, E., Su, S.-Y., Gonçalves, Â., Coin, L. J., Richardson, S., and Lewin, A. (2011). Haplotype and isoform specific expression estimation using multi-mapping RNA-seq reads. <em>Genome Biology</em>, <em>12</em>(2), R13.</p>
+</div>
+<div id="ref-VanDenBerge2017">
+<p>Van den Berge, K., Soneson, C., Robinson, M. D., and Clement, L. (2017). stageR: a general stage-wise method for controlling the gene-level false discovery rate in differential expression and differential transcript usage. <em>Genome Biology</em>, <em>18</em>(1), 151.</p>
+</div>
+<div id="ref-Zhu2019">
+<p>Zhu, A., Srivastava, A., Ibrahim, J., Patro, R., and Love, M. (2019). Nonparametric expression analysis using inferential replicate counts. <em>Nucleic Acids Research</em>.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="model.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="limits.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["Statistical Modeling of High Dimensional Counts.pdf", "Statistical Modeling of High Dimensional Counts.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

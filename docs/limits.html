@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 4 Limitations and extensions | Statistical Modeling of High Dimensional Counts</title>
+  <meta name="description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
+  <meta name="generator" content="bookdown 0.16 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 4 Limitations and extensions | Statistical Modeling of High Dimensional Counts" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 4 Limitations and extensions | Statistical Modeling of High Dimensional Counts" />
+  
+  <meta name="twitter:description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
+  
+
+<meta name="author" content="Michael I. Love" />
+
+
+<meta name="date" content="2020-01-31" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="transcripts.html"/>
+<link rel="next" href="session.html"/>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Stat. Model. of High Dim. Counts</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>About this online book</a></li>
+<li class="chapter" data-level="1" data-path="quantification.html"><a href="quantification.html"><i class="fa fa-check"></i><b>1</b> Quantification</a></li>
+<li class="chapter" data-level="2" data-path="model.html"><a href="model.html"><i class="fa fa-check"></i><b>2</b> Counts modeling</a><ul>
+<li class="chapter" data-level="2.1" data-path="model.html"><a href="model.html#a-first-exploration-of-counts"><i class="fa fa-check"></i><b>2.1</b> A first exploration of counts</a></li>
+<li class="chapter" data-level="2.2" data-path="model.html"><a href="model.html#modeling-counts-with-deseq2"><i class="fa fa-check"></i><b>2.2</b> Modeling counts with DESeq2</a></li>
+<li class="chapter" data-level="2.3" data-path="model.html"><a href="model.html#hypothesis-weighting"><i class="fa fa-check"></i><b>2.3</b> Hypothesis weighting</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="transcripts.html"><a href="transcripts.html"><i class="fa fa-check"></i><b>3</b> Transcript expression</a></li>
+<li class="chapter" data-level="4" data-path="limits.html"><a href="limits.html"><i class="fa fa-check"></i><b>4</b> Limitations and extensions</a></li>
+<li class="chapter" data-level="5" data-path="session.html"><a href="session.html"><i class="fa fa-check"></i><b>5</b> Session information</a></li>
+<li class="chapter" data-level="6" data-path="references.html"><a href="references.html"><i class="fa fa-check"></i><b>6</b> References</a></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Statistical Modeling of High Dimensional Counts</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="limits" class="section level1">
+<h1><span class="header-section-number">Chapter 4</span> Limitations and extensions</h1>
+<p>In this final chapter, I discuss limitations to the methods presented
+earlier, and extensions for analyzing high dimensional counts in
+contexts beyond what was previously covered.</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Single cell RNA-seq</strong> - The <em>DESeq2</em> framework shown in the
+gene-level analysis chapter was designed for bulk RNA-seq, in which
+the Negative Binomial GLM assessing differences across samples was
+suitable both in terms of distribution and in terms of answering
+many biological questions of interest. In single cell RNA-seq,
+there are new considerations and questions of interest. One aspect
+is that, with UMI barcoding, there is a need for quantification
+methods that resolve errors and de-duplicate the read data into
+molecule counts per cell. The <em>alevin</em> method <span class="citation">(A. Srivastava, Malik, Smith, et al., <a href="#ref-Srivastava2019">2019</a>)</span>,
+packaged within the <em>Salmon</em> software, can accomplish this UMI
+de-duplication, and can resolve the increased rate of multi-mapping
+reads seen in 3’ tagged sequencing, through an approach similar
+to that taken by <em>Salmon</em>. The quantification from <em>alevin</em> can
+be easily imported into R/Bioconductor using the <em>tximeta</em>
+software seen in the quantification chapter.</p>
+After quantification, there are many choices regarding the analysis
+pipeline, I refer to recent reviews for systematic comparison.
+<span class="citation">Soneson and Robinson (<a href="#ref-Soneson2018">2018</a>)</span> evaluates methods for detecting differences in
+expression across groups of cells. <span class="citation">Sun et al. (<a href="#ref-Sun2019">2019</a>)</span> evaluates methods for
+dimension reduction, which is often performed in the context of
+cell clustering and lineage reconstruction. <span class="citation">Duo et al. (<a href="#ref-Duo2018">2018</a>)</span> evaluates
+methods for clustering to recover sub-populations of cells.
+Finally, I note that the NB methods shown in the gene-level
+chapter can be combined with other statistical methods to add and
+model a zero component, in the case that the Negative Binomial is
+not a suitable distribution <span class="citation">(Van den Berge et al., <a href="#ref-Berge2018">2018</a>)</span>. The zero component may not
+be needed for all scRNA-seq datasets however, in particular if UMI
+de-duplication is possible.</li>
+<li><strong>Long reads</strong> - The data presented in previous sections involved
+sequencing relatively short sequences of the cDNA fragments. They
+sequences are short in the sense that they do not come close to
+capturing the entire sequence of the transcript for most mammalian
+transcripts. However, new technologies have emerged in the past
+decade that allow for high-throughput sequencing of lengths
+that approach the entire transcript length. This necessitates
+new methods for alignment (the long sequences nevertheless have a
+higher error rate than the “short” reads). One of the most popular
+methods for aligning long reads is <em>minimap2</em> <span class="citation">(Li, <a href="#ref-Li2018">2018</a>)</span>. Following
+alignment, it is possible to again quantify expression using
+<em>Salmon</em> and import the data into R/Bioconductor using <em>tximeta</em>.
+A systematic evaluation of quantification using the Nanopore
+long read technology has been performed by <span class="citation">Soneson et al. (<a href="#ref-Soneson2019">2019</a>)</span>.
+Additionally, a pipeline for long read mapping with <em>minimap2</em> and
+quantification with <em>Salmon</em> has been recently published
+with an associated <a href="https://bit.ly/3403pVc">GitHub repository</a>
+[CruzGarcia2019].</li>
+<li><strong>Genetic variation</strong> - An aspect not explored in the previous
+sections was genetic variation across the samples in the exonic
+sequence. One analysis of interest is to identify common genetic
+variants in the exonic sequence, and to quantify, among the
+samples that are heterozygous for a given exonic SNP, the
+expression of each allele. Best practices for allelic expression
+analysis have been presented by <span class="citation">Castel et al. (<a href="#ref-Castel2015">2015</a>)</span>, and an evaluation
+of EM-based methods for assessing allelic expression have been
+proposed and compared by <span class="citation">Raghupathy et al. (<a href="#ref-Raghupathy2018">2018</a>)</span>. Aside from interest in
+quantifying allelic expression in the presence of heterozygous
+exonic positions, <span class="citation">A. Srivastava, Malik, Sarkar, et al. (<a href="#ref-Srivastava2019Align">2019</a>)</span> have examined the effect
+of genetic variation on transcript and gene expression
+quantification.</li>
+<li><p><strong>Microbiome</strong> - I have described here various methods for analyzing
+counts reflecting the abundance of RNA molecules across samples.
+Another type of high dimensional count dataset with similar but
+distinct analysis considerations is that produced in a microbiome
+or metagenomic study, in which the counts reflect the abundance
+of certain taxa across samples. The count data is arranged in a
+similar format to gene expression, but with the taxa replacing the
+transcripts or genes on the rows of the matrix.</p>
+<p>While many have considered using gene expression normalization and
+testing methods for analyzing this type of data, a number of the
+assumptions used in gene expression models may be invalid for
+particular microbiome datasets. In particular, I demonstrated in
+the first exploration of gene expression counts that there were
+thousands of features in which the changes from sample to sample
+were minimal. There was a clear center of the distribution of log
+fold changes that could be used to estimate the size factors for
+scaling normalization across samples. In particular microbiome
+studies, this assumption may not fit, as there may not be a group
+of taxa that can be assumed roughly equally abundant across all
+samples in a dataset. In addition, there may be too few taxa, such
+that the Poisson modeling assumption no longer makes sense, and so
+a compositional model may better capture the distributional
+properties <span class="citation">(Fernandes et al., <a href="#ref-Fernandes2014">2014</a>)</span>. A recent benchmarking effort compares
+compositional methods as well as single cell RNA-seq methods for
+analyzing microbiome datasets for differences in abundance of taxa
+<span class="citation">(Calgaro et al., <a href="#ref-Calgaro2020">2020</a>)</span>.</p>
+<p>Alternative pipelines for analyzing microbiome abundance data
+have been detailed by <span class="citation">Callahan et al. (<a href="#ref-Callahan2016">2016</a>)</span>. There may be more interesting
+and relevant approaches to modeling the counts besides the GLM, and
+latent variable models are considered and applied to microbiome
+datasets recently by <span class="citation">Sankaran and Holmes (<a href="#ref-Sankaran2018">2018</a>)</span>. Finally, statistical
+considerations of various diversity measures for count-based
+microbiome studies have been explored recently by <span class="citation">Willis (<a href="#ref-Willis2019">2019</a>)</span>.</p></li>
+</ol>
+
+</div>
+<h3> References</h3>
+<div id="refs" class="references">
+<div id="ref-Calgaro2020">
+<p>Calgaro, M., Romualdi, C., Waldron, L., Risso, D., and Vitulo, N. (2020). Assessment of single cell rna-seq statistical methods on microbiome data. <em>bioRxiv</em>.</p>
+</div>
+<div id="ref-Callahan2016">
+<p>Callahan, B., Sankaran, K., Fukuyama, J., McMurdie, P., and Holmes, S. (2016). Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses. <em>F1000Research</em>, <em>5</em>(1492).</p>
+</div>
+<div id="ref-Castel2015">
+<p>Castel, S. E., Levy-Moonshine, A., Mohammadi, P., Banks, E., and Lappalainen, T. (2015). Tools and best practices for data processing in allelic expression analysis. <em>Genome Biology</em>, <em>16</em>(1), 195.</p>
+</div>
+<div id="ref-Duo2018">
+<p>Duo, A., Robinson, M., and Soneson, C. (2018). A systematic performance evaluation of clustering methods for single-cell RNA-seq data. <em>F1000Research</em>, <em>7</em>(1141).</p>
+</div>
+<div id="ref-Fernandes2014">
+<p>Fernandes, A. D., Reid, J. N., Macklaim, J. M., McMurrough, T. A., Edgell, D. R., and Gloor, G. B. (2014). Unifying the analysis of high-throughput sequencing datasets: characterizing RNA-seq, 16S rRNA gene sequencing and selective growth experiments by compositional data analysis. <em>Microbiome</em>, <em>2</em>(1), 15.</p>
+</div>
+<div id="ref-Li2018">
+<p>Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. <em>Bioinformatics</em>, <em>34</em>(18), 3094–3100.</p>
+</div>
+<div id="ref-Raghupathy2018">
+<p>Raghupathy, N., Choi, K., Vincent, M. J., Beane, G. L., Sheppard, K. S., Munger, S. C., … Churchill, G. A. (2018). Hierarchical analysis of RNA-seq reads improves the accuracy of allele-specific expression. <em>Bioinformatics</em>, <em>34</em>(13), 2177–2184.</p>
+</div>
+<div id="ref-Sankaran2018">
+<p>Sankaran, K., and Holmes, S. P. (2018). Latent variable modeling for the microbiome. <em>Biostatistics</em>, <em>20</em>(4), 599–614.</p>
+</div>
+<div id="ref-Soneson2018">
+<p>Soneson, C., and Robinson, M. D. (2018). Bias, robustness and scalability in single-cell differential expression analysis. <em>Nature Methods</em>, <em>15</em>(4), 255–261.</p>
+</div>
+<div id="ref-Soneson2019">
+<p>Soneson, C., Yao, Y., Bratus-Neuenschwander, A., Patrignani, A., Robinson, M. D., and Hussain, S. (2019). A comprehensive examination of Nanopore native RNA sequencing for characterization of complex transcriptomes. <em>Nature Communications</em>, <em>10</em>(1), 3359.</p>
+</div>
+<div id="ref-Srivastava2019Align">
+<p>Srivastava, A., Malik, L., Sarkar, H., Zakeri, M., Almodaresi, F., Soneson, C., … Patro, R. (2019). Alignment and mapping methodology influence transcript abundance estimation. <em>bioRxiv</em>.</p>
+</div>
+<div id="ref-Srivastava2019">
+<p>Srivastava, A., Malik, L., Smith, T. S., Sudbery, I., and Patro, R. (2019). Alevin efficiently estimates accurate gene abundances from dscRNA-seq data. <em>Genome Biology</em>, <em>20</em>(65).</p>
+</div>
+<div id="ref-Sun2019">
+<p>Sun, S., Zhu, J., Ma, Y., and Zhou, X. (2019). Accuracy, Robustness and Scalability of Dimensionality Reduction Methods for Single Cell RNAseq Analysis. <em>bioRxiv</em>.</p>
+</div>
+<div id="ref-Berge2018">
+<p>Van den Berge, K., Perraudeau, F., Soneson, C., Love, M. I., Risso, D., Vert, J.-P., … Clement, L. (2018). Observation weights unlock bulk RNA-seq tools for zero inflation and single-cell applications. <em>Genome Biology</em>, <em>19</em>(24).</p>
+</div>
+<div id="ref-Willis2019">
+<p>Willis, A. D. (2019). Rarefaction, alpha diversity, and statistics. <em>Frontiers in Microbiology</em>, <em>10</em>, 2407.</p>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="transcripts.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="session.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": ["Statistical Modeling of High Dimensional Counts.pdf", "Statistical Modeling of High Dimensional Counts.epub"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>
