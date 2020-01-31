@@ -345,7 +345,7 @@ with methods described by @Stephens2016.
 We can now examine the differences between the MLE and the Bayesian
 estimate of fold change from *apeglm*. First the MLE:
 
-```{r ma-shrink}
+```{r ma-mle}
 plotMA(res, ylim=c(-4,4), 
        colNonSig="grey60", colSig="blue", colLine="grey40")
 ```
@@ -359,7 +359,7 @@ due to imprecision on the left side of the plot is reduced. In the
 paper by @Zhu2018, it is demonstrated that the shrunken LFC are better
 suited for ranking genes by effect size.
 
-```{r ma-shrinkn2}
+```{r ma-shrink}
 plotMA(lfc, ylim=c(-4,4), 
        colNonSig="grey60", colSig="blue", colLine="grey40")
 ```
