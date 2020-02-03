@@ -21,7 +21,11 @@ contexts beyond what was previously covered.
    software seen in the quantification chapter.
 
    After quantification, there are many choices regarding the analysis
-   pipeline, I refer to recent reviews for systematic comparison.
+   pipeline, I refer to Bioconductor's online book for single cell 
+   analysis, and recent reviews for systematic comparisons.
+   @Amezquita2020 have recently published an overview and
+   [online book](https://osca.bioconductor.org/) for performing
+   analysis of scRNA-seq data using Bioconductor packages.
    @Soneson2018 evaluates methods for detecting differences in 
    expression across groups of cells. @Sun2019 evaluates methods for
    dimension reduction, which is often performed in the context of
