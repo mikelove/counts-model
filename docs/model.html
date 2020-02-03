@@ -297,7 +297,7 @@ distribution along the genes. I then repeat the same code as above,
 to examine the MA-plot for the simulated counts.</p>
 <div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" data-line-number="1">sim.cts &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rpois</span>(<span class="kw">nrow</span>(p) <span class="op">*</span><span class="st"> </span><span class="dv">2</span>, <span class="fl">30e6</span> <span class="op">*</span><span class="st"> </span>p[,<span class="dv">1</span>]), <span class="dt">ncol=</span><span class="dv">2</span>)</a>
 <a class="sourceLine" id="cb45-2" data-line-number="2"><span class="kw">colSums</span>(sim.cts)</a></code></pre></div>
-<pre><code>## [1] 30001346 29996359</code></pre>
+<pre><code>## [1] 29997299 29989870</code></pre>
 <div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" data-line-number="1">idx &lt;-<span class="st"> </span><span class="kw">rowSums</span>(sim.cts <span class="op">&gt;=</span><span class="st"> </span><span class="dv">5</span>) <span class="op">==</span><span class="st"> </span><span class="dv">2</span></a>
 <a class="sourceLine" id="cb47-2" data-line-number="2">sim.cts &lt;-<span class="st"> </span>sim.cts[idx,]</a>
 <a class="sourceLine" id="cb47-3" data-line-number="3">sim.p &lt;-<span class="st"> </span><span class="kw">sweep</span>(sim.cts, <span class="dv">2</span>, <span class="kw">colSums</span>(sim.cts), <span class="st">&quot;/&quot;</span>)</a>
@@ -683,7 +683,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": "Statistical-Modeling-of-High-Dimensional-Counts.pdf",
+"download": [["Statistical-Modeling-of-High-Dimensional-Counts.pdf", "PDF"]],
 "toc": {
 "collapse": "subsection"
 }

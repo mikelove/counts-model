@@ -6,7 +6,8 @@ bookdown::gitbook:
         <li><a href="./">Stat. Model. of High Dim. Counts</a></li>
       after: |
         <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
-    download: ["Statistical-Modeling-of-High-Dimensional-Counts.pdf"]
+    download: 
+      - ["Statistical-Modeling-of-High-Dimensional-Counts.pdf", "PDF"]
     sharing: no
 bookdown::pdf_book:
   includes:
