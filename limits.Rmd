@@ -51,10 +51,12 @@ contexts beyond what was previously covered.
    *Salmon* and import the data into R/Bioconductor using *tximeta*.
    A systematic evaluation of quantification using the Nanopore
    long read technology has been performed by @Soneson2019. 
-   Additionally, a pipeline for long read mapping with *minimap2* and 
+   A pipeline for long read mapping with *minimap2* and 
    quantification with *Salmon* has been recently published
    with an associated [GitHub repository](https://bit.ly/3403pVc)
-   [@CruzGarcia2019].
+   [@CruzGarcia2019]. Finally, a review of bioinformatic pipelines
+   for long read data analysis has recently been published 
+   by @Amarasinghe2020.
 3. **Genetic variation** - An aspect not explored in the previous 
    sections was genetic variation across the samples in the exonic 
    sequence. One analysis of interest is to identify common genetic 
