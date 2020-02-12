@@ -220,7 +220,7 @@ check the help page `?DESeq`, as well as a section of the vignette
 called, ``The DESeq2 model''. Briefly, *DESeq2* computes a robust
 size factor which outperforms the total count in adjusting for
 differential sequence depth across libraries. Then *DESeq2* computes
-(iteralively) the coefficients of a generalized linear model (GLM),
+(iteratively) the coefficients of a generalized linear model (GLM),
 and a dispersion parameter that reflects the variation in addition
 to the Poisson variation, around the expected value for each sample 
 conditioned on information in the design matrix.
