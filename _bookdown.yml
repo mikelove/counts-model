@@ -6,5 +6,5 @@ language:
 rmd_files: ["index.Rmd", "quantification.Rmd", 
             "model.Rmd", "transcripts.Rmd", 
             "limits.Rmd", "session.Rmd",
-	    "references.Rmd"]
+	          "references.Rmd"]
 output_dir: "docs"

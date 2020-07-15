@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html lang="" xml:lang="">
 <head>
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 3 Transcript expression | Statistical Modeling of High Dimensional Counts</title>
   <meta name="description" content="This book covers some basic routines for statistical modeling of high dimensional count data in using R/Bioconductor." />
-  <meta name="generator" content="bookdown 0.16 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.20 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 3 Transcript expression | Statistical Modeling of High Dimensional Counts" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="Michael I. Love" />
 
 
-<meta name="date" content="2020-02-10" />
+<meta name="date" content="2020-07-15" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -257,8 +257,8 @@ will not be contained in an R package, but contained in some directory
 on a server or compute cluster. In lieu of the <code>system.file</code> command
 below, you should just specify the <code>dir</code> variable to be a path to the
 files, e.g. <code>/path/to/data/dir</code>.</p>
-<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" data-line-number="1">dir &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="dt">package=</span><span class="st">&quot;macrophage&quot;</span>)</a>
-<a class="sourceLine" id="cb84-2" data-line-number="2"><span class="kw">list.files</span>(dir)</a></code></pre></div>
+<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" data-line-number="1">dir &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="dt">package=</span><span class="st">&quot;macrophage&quot;</span>)</a>
+<a class="sourceLine" id="cb90-2" data-line-number="2"><span class="kw">list.files</span>(dir)</a></code></pre></div>
 <pre><code>## [1] &quot;coldata.csv&quot;                  
 ## [2] &quot;errs&quot;                         
 ## [3] &quot;gencode.v29_salmon_0.12.0&quot;    
@@ -270,9 +270,9 @@ files, e.g. <code>/path/to/data/dir</code>.</p>
 <p>I then read in the sample table, and use <em>dplyr</em> to select certain
 columns, convert columns into factors, and add a new column pointing
 to the quantification files.</p>
-<div class="sourceCode" id="cb86"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb86-1" data-line-number="1"><span class="kw">library</span>(readr)</a>
-<a class="sourceLine" id="cb86-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
-<a class="sourceLine" id="cb86-3" data-line-number="3">coldata &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">file.path</span>(dir,<span class="st">&quot;coldata.csv&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" data-line-number="1"><span class="kw">library</span>(readr)</a>
+<a class="sourceLine" id="cb92-2" data-line-number="2"><span class="kw">library</span>(dplyr)</a>
+<a class="sourceLine" id="cb92-3" data-line-number="3">coldata &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="kw">file.path</span>(dir,<span class="st">&quot;coldata.csv&quot;</span>))</a></code></pre></div>
 <pre><code>## Parsed with column specification:
 ## cols(
 ##   names = col_character(),
@@ -289,19 +289,19 @@ to the quantification files.</p>
 ##   chemistry = col_character(),
 ##   rna_auto = col_double()
 ## )</code></pre>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb88-1" data-line-number="1">lvls &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;naive&quot;</span>,<span class="st">&quot;IFNg&quot;</span>,<span class="st">&quot;SL1344&quot;</span>,<span class="st">&quot;IFNg_SL1344&quot;</span>)</a>
-<a class="sourceLine" id="cb88-2" data-line-number="2">coldata &lt;-<span class="st"> </span>coldata <span class="op">%&gt;%</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb88-3" data-line-number="3"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(names, <span class="dt">id=</span>sample_id, <span class="dt">line=</span>line_id, </a>
-<a class="sourceLine" id="cb88-4" data-line-number="4">                <span class="dt">condition=</span>condition_name) <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb88-5" data-line-number="5"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">line=</span><span class="kw">factor</span>(line),</a>
-<a class="sourceLine" id="cb88-6" data-line-number="6">         <span class="dt">condition=</span><span class="kw">factor</span>(condition, <span class="dt">levels=</span>lvls),</a>
-<a class="sourceLine" id="cb88-7" data-line-number="7">         <span class="dt">files=</span><span class="kw">file.path</span>(dir, <span class="st">&quot;quants&quot;</span>, names, <span class="st">&quot;quant.sf.gz&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" data-line-number="1">lvls &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;naive&quot;</span>,<span class="st">&quot;IFNg&quot;</span>,<span class="st">&quot;SL1344&quot;</span>,<span class="st">&quot;IFNg_SL1344&quot;</span>)</a>
+<a class="sourceLine" id="cb94-2" data-line-number="2">coldata &lt;-<span class="st"> </span>coldata <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb94-3" data-line-number="3"><span class="st">  </span>dplyr<span class="op">::</span><span class="kw">select</span>(names, <span class="dt">id=</span>sample_id, <span class="dt">line=</span>line_id, </a>
+<a class="sourceLine" id="cb94-4" data-line-number="4">                <span class="dt">condition=</span>condition_name) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb94-5" data-line-number="5"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">line=</span><span class="kw">factor</span>(line),</a>
+<a class="sourceLine" id="cb94-6" data-line-number="6">         <span class="dt">condition=</span><span class="kw">factor</span>(condition, <span class="dt">levels=</span>lvls),</a>
+<a class="sourceLine" id="cb94-7" data-line-number="7">         <span class="dt">files=</span><span class="kw">file.path</span>(dir, <span class="st">&quot;quants&quot;</span>, names, <span class="st">&quot;quant.sf.gz&quot;</span>))</a></code></pre></div>
 <p>I will only consider for this demonstration the untreated and IFNg
 treated samples:</p>
-<div class="sourceCode" id="cb89"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb89-1" data-line-number="1">coldata &lt;-<span class="st"> </span>coldata <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(condition <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;naive&quot;</span>,<span class="st">&quot;IFNg&quot;</span>))</a>
-<a class="sourceLine" id="cb89-2" data-line-number="2">coldata<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">droplevels</span>(coldata<span class="op">$</span>condition)</a></code></pre></div>
+<div class="sourceCode" id="cb95"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb95-1" data-line-number="1">coldata &lt;-<span class="st"> </span>coldata <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">filter</span>(condition <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;naive&quot;</span>,<span class="st">&quot;IFNg&quot;</span>))</a>
+<a class="sourceLine" id="cb95-2" data-line-number="2">coldata<span class="op">$</span>condition &lt;-<span class="st"> </span><span class="kw">droplevels</span>(coldata<span class="op">$</span>condition)</a></code></pre></div>
 <p>The <code>coldata</code> sample table now looks like:</p>
-<div class="sourceCode" id="cb90"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb90-1" data-line-number="1"><span class="kw">head</span>(coldata)</a></code></pre></div>
+<div class="sourceCode" id="cb96"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb96-1" data-line-number="1"><span class="kw">head</span>(coldata)</a></code></pre></div>
 <pre><code>## # A tibble: 6 x 5
 ##   names     id     line  condition files                         
 ##   &lt;chr&gt;     &lt;chr&gt;  &lt;fct&gt; &lt;fct&gt;     &lt;chr&gt;                         
@@ -312,27 +312,27 @@ treated samples:</p>
 ## 5 SAMEA103… fikt_A fikt… naive     /Library/Frameworks/R.framewo…
 ## 6 SAMEA103… fikt_B fikt… IFNg      /Library/Frameworks/R.framewo…</code></pre>
 <p>Test that all the files exist as I specified:</p>
-<div class="sourceCode" id="cb92"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb92-1" data-line-number="1"><span class="kw">all</span>(<span class="kw">file.exists</span>(coldata<span class="op">$</span>files))</a></code></pre></div>
+<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" data-line-number="1"><span class="kw">all</span>(<span class="kw">file.exists</span>(coldata<span class="op">$</span>files))</a></code></pre></div>
 <pre><code>## [1] TRUE</code></pre>
 <p>As before, I use <em>tximeta</em> to read in the quantification data. This
 time I do not set <code>dropInfReps=TRUE</code>, as I will need the inferential
 replicates created by <em>Salmon</em> to perform DTE with <em>Swish</em>. The
 inferential replicates allows the analysis to take into account the
 uncertainty of fragment assignment to transcripts.</p>
-<div class="sourceCode" id="cb94"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb94-1" data-line-number="1"><span class="kw">library</span>(tximeta)</a>
-<a class="sourceLine" id="cb94-2" data-line-number="2"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(SummarizedExperiment))</a>
-<a class="sourceLine" id="cb94-3" data-line-number="3">y &lt;-<span class="st"> </span><span class="kw">tximeta</span>(coldata)</a></code></pre></div>
+<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1"><span class="kw">library</span>(tximeta)</a>
+<a class="sourceLine" id="cb100-2" data-line-number="2"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(SummarizedExperiment))</a>
+<a class="sourceLine" id="cb100-3" data-line-number="3">y &lt;-<span class="st"> </span><span class="kw">tximeta</span>(coldata)</a></code></pre></div>
 <pre><code>## importing quantifications</code></pre>
 <pre><code>## reading in files with read_tsv</code></pre>
 <pre><code>## 1 2 3 4 5 6 7 8 9 10 11 12 
 ## found matching linked transcriptome:
 ## [ GENCODE - Homo sapiens - release 29 ]
-## loading existing TxDb created: 2019-02-11 14:22:51
-## loading existing transcript ranges created: 2019-05-31 20:37:15
+## loading existing TxDb created: 2020-03-12 01:46:43
+## loading existing transcript ranges created: 2020-03-12 01:48:11
 ## fetching genome info for GENCODE</code></pre>
 <p>For speed of the demonstration, I subset to only the transcripts on
 chromosome 1 (this would not be recommended for a typical analysis).</p>
-<div class="sourceCode" id="cb98"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb98-1" data-line-number="1">y &lt;-<span class="st"> </span>y[<span class="kw">seqnames</span>(y) <span class="op">==</span><span class="st"> &quot;chr1&quot;</span>,]</a></code></pre></div>
+<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" data-line-number="1">y &lt;-<span class="st"> </span>y[<span class="kw">seqnames</span>(y) <span class="op">==</span><span class="st"> &quot;chr1&quot;</span>,]</a></code></pre></div>
 <p>I load the <em>fishpond</em> package, which contains the methods for running
 <em>Swish</em>. There are three basic steps: scaling of the inferential
 replicates to make them comparable despite different sequencing depth,
@@ -343,25 +343,27 @@ transcripts with 3 or more samples with a count of 10 or higher. For
 scRNA-seq with UMI de-duplication, it is recommended to lower the
 minimal count to a lower value such as 3. The minimal number of
 samples can be increased for experiments with many samples.</p>
-<div class="sourceCode" id="cb99"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb99-1" data-line-number="1"><span class="kw">library</span>(fishpond)</a></code></pre></div>
-<div class="sourceCode" id="cb100"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb100-1" data-line-number="1">y &lt;-<span class="st"> </span><span class="kw">scaleInfReps</span>(y, <span class="dt">quiet=</span><span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb100-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw">labelKeep</span>(y)</a>
-<a class="sourceLine" id="cb100-3" data-line-number="3">y &lt;-<span class="st"> </span>y[<span class="kw">mcols</span>(y)<span class="op">$</span>keep,]</a></code></pre></div>
+<div class="sourceCode" id="cb105"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb105-1" data-line-number="1"><span class="kw">library</span>(fishpond)</a></code></pre></div>
+<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" data-line-number="1">y &lt;-<span class="st"> </span><span class="kw">scaleInfReps</span>(y, <span class="dt">quiet=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb106-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw">labelKeep</span>(y)</a>
+<a class="sourceLine" id="cb106-3" data-line-number="3">y &lt;-<span class="st"> </span>y[<span class="kw">mcols</span>(y)<span class="op">$</span>keep,]</a></code></pre></div>
 <p>Because the method makes use of permutations, it is required to set a
 seed for computational reproducibility. I specify to test across the
 <code>condition</code> variable, while controlling for a pairing variable
 <code>line</code>. The <code>line</code> variable indicates which donor the cell line came
 from.</p>
-<div class="sourceCode" id="cb101"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb101-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1</span>)</a>
-<a class="sourceLine" id="cb101-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw">swish</span>(y, <span class="dt">x=</span><span class="st">&quot;condition&quot;</span>, <span class="dt">pair=</span><span class="st">&quot;line&quot;</span>, <span class="dt">quiet=</span><span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb107-1" data-line-number="1"><span class="kw">set.seed</span>(<span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb107-2" data-line-number="2">y &lt;-<span class="st"> </span><span class="kw">swish</span>(y, <span class="dt">x=</span><span class="st">&quot;condition&quot;</span>, <span class="dt">pair=</span><span class="st">&quot;line&quot;</span>, <span class="dt">quiet=</span><span class="ot">TRUE</span>)</a></code></pre></div>
+<pre><code>## note: less permutations are available than requested</code></pre>
+<pre><code>## 64 are available</code></pre>
 <p>After running <code>swish</code>, all of the results are stored in the metadata
 columns (<code>mcols</code>) of the object <code>y</code>. I look to see how many
 transcripts have a small q-value (analogous to an adjusted p-value,
 this should provide a set with a nominal FDR control).</p>
-<div class="sourceCode" id="cb102"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb102-1" data-line-number="1"><span class="kw">names</span>(<span class="kw">mcols</span>(y))</a></code></pre></div>
+<div class="sourceCode" id="cb110"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb110-1" data-line-number="1"><span class="kw">names</span>(<span class="kw">mcols</span>(y))</a></code></pre></div>
 <pre><code>##  [1] &quot;tx_id&quot;     &quot;gene_id&quot;   &quot;tx_name&quot;   &quot;log10mean&quot; &quot;keep&quot;     
 ##  [6] &quot;stat&quot;      &quot;log2FC&quot;    &quot;pvalue&quot;    &quot;locfdr&quot;    &quot;qvalue&quot;</code></pre>
-<div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb104-1" data-line-number="1"><span class="kw">table</span>(<span class="kw">mcols</span>(y)<span class="op">$</span>qvalue <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb112"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb112-1" data-line-number="1"><span class="kw">table</span>(<span class="kw">mcols</span>(y)<span class="op">$</span>qvalue <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>)</a></code></pre></div>
 <pre><code>## 
 ## FALSE  TRUE 
 ##  5081  1329</code></pre>
@@ -371,19 +373,19 @@ p-value distribution is roughly uniform, with the exception of the
 rejected tests. Here <em>Swish</em> provides a roughly uniform distribution,
 with a spike on the left side representing the rejections of the null
 hypothesis.</p>
-<div class="sourceCode" id="cb106"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb106-1" data-line-number="1"><span class="kw">hist</span>(<span class="kw">mcols</span>(y)<span class="op">$</span>pvalue, <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>,</a>
-<a class="sourceLine" id="cb106-2" data-line-number="2">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;p-values&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb114"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb114-1" data-line-number="1"><span class="kw">hist</span>(<span class="kw">mcols</span>(y)<span class="op">$</span>pvalue, <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>,</a>
+<a class="sourceLine" id="cb114-2" data-line-number="2">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;p-values&quot;</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/swish-hist-1.png" width="672" /></p>
 <p>As with <em>DESeq2</em> I can make an MA-plot, with the differential
 transcripts highlighted in blue (here at 5% FDR).</p>
-<div class="sourceCode" id="cb107"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb107-1" data-line-number="1"><span class="kw">plotMASwish</span>(y, <span class="dt">alpha=</span>.<span class="dv">05</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb115"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb115-1" data-line-number="1"><span class="kw">plotMASwish</span>(y, <span class="dt">alpha=</span>.<span class="dv">05</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/swish-ma-1.png" width="672" /></p>
 <p>I can also examine individual transcripts with evidence of
 differential expression. As each sample is represented by a
 distribution of possible estimated counts from <em>Salmon</em>, <em>Swish</em> uses
 boxplots to represent the differences in expression across samples:</p>
-<div class="sourceCode" id="cb108"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb108-1" data-line-number="1">idx &lt;-<span class="st"> </span><span class="kw">with</span>(<span class="kw">mcols</span>(y), <span class="kw">which</span>(pvalue <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span> <span class="op">&amp;</span><span class="st"> </span>log2FC <span class="op">&gt;</span><span class="st"> </span><span class="dv">4</span>))</a>
-<a class="sourceLine" id="cb108-2" data-line-number="2"><span class="kw">plotInfReps</span>(y, idx[<span class="dv">1</span>], <span class="dt">x=</span><span class="st">&quot;condition&quot;</span>, <span class="dt">cov=</span><span class="st">&quot;line&quot;</span>, <span class="dt">xaxis=</span><span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb116"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb116-1" data-line-number="1">idx &lt;-<span class="st"> </span><span class="kw">with</span>(<span class="kw">mcols</span>(y), <span class="kw">which</span>(pvalue <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span> <span class="op">&amp;</span><span class="st"> </span>log2FC <span class="op">&gt;</span><span class="st"> </span><span class="dv">4</span>))</a>
+<a class="sourceLine" id="cb116-2" data-line-number="2"><span class="kw">plotInfReps</span>(y, idx[<span class="dv">1</span>], <span class="dt">x=</span><span class="st">&quot;condition&quot;</span>, <span class="dt">cov=</span><span class="st">&quot;line&quot;</span>, <span class="dt">xaxis=</span><span class="ot">FALSE</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/swish-counts-1.png" width="672" /></p>
 <p>This chapter gives a basic introduction to DTE using nonparametric
 testing with the <em>Swish</em> method. For more details on transcript-level
