@@ -176,7 +176,7 @@ many biological questions of interest. In single cell RNA-seq,
 there are new considerations and questions of interest. One aspect
 is that, with UMI barcoding, there is a need for quantification
 methods that resolve errors and de-duplicate the read data into
-molecule counts per cell. The <em>alevin</em> method <span class="citation">(A. Srivastava, Malik, Smith, et al. <a href="#ref-Srivastava2019">2019</a>)</span>,
+molecule counts per cell. The <em>alevin</em> method <span class="citation">(<a href="#ref-Srivastava2019">10</a>)</span>,
 packaged within the <em>Salmon</em> software, can accomplish this UMI
 de-duplication, and can resolve the increased rate of multi-mapping
 reads seen in 3’ tagged sequencing, through an approach similar
@@ -186,18 +186,18 @@ software seen in the quantification chapter.</p>
 After quantification, there are many choices regarding the analysis
 pipeline, I refer to Bioconductor’s online book for single cell
 analysis, and recent reviews for systematic comparisons.
-<span class="citation">Amezquita et al. (<a href="#ref-Amezquita2020">2020</a>)</span> have recently published an overview and
+<span class="citation">(<a href="#ref-Amezquita2020">45</a>)</span> have recently published an overview and
 <a href="https://osca.bioconductor.org/">online book</a> for performing
 analysis of scRNA-seq data using Bioconductor packages.
-<span class="citation">Soneson and Robinson (<a href="#ref-Soneson2018">2018</a>)</span> evaluates methods for detecting differences in
-expression across groups of cells. <span class="citation">Sun et al. (<a href="#ref-Sun2019">2019</a>)</span> evaluates methods for
+<span class="citation">(<a href="#ref-Soneson2018">46</a>)</span> evaluates methods for detecting differences in
+expression across groups of cells. <span class="citation">(<a href="#ref-Sun2019">47</a>)</span> evaluates methods for
 dimension reduction, which is often performed in the context of
-cell clustering and lineage reconstruction. <span class="citation">Duo, Robinson, and Soneson (<a href="#ref-Duo2018">2018</a>)</span> evaluates
+cell clustering and lineage reconstruction. <span class="citation">(<a href="#ref-Duo2018">48</a>)</span> evaluates
 methods for clustering to recover sub-populations of cells.
 Finally, I note that the NB methods shown in the gene-level
 chapter can be combined with other statistical methods to add and
 model a zero component, in the case that the Negative Binomial is
-not a suitable distribution <span class="citation">(Van den Berge et al. <a href="#ref-Berge2018">2018</a>)</span>. The zero component may not
+not a suitable distribution <span class="citation">(<a href="#ref-Berge2018">49</a>)</span>. The zero component may not
 be needed for all scRNA-seq datasets however, in particular if UMI
 de-duplication is possible.</li>
 <li><strong>Long reads</strong> - The data presented in previous sections involved
@@ -209,28 +209,28 @@ decade that allow for high-throughput sequencing of lengths
 that approach the entire transcript length. This necessitates
 new methods for alignment (the long sequences nevertheless have a
 higher error rate than the “short” reads). One of the most popular
-methods for aligning long reads is <em>minimap2</em> <span class="citation">(Li <a href="#ref-Li2018">2018</a>)</span>. Following
+methods for aligning long reads is <em>minimap2</em> <span class="citation">(<a href="#ref-Li2018">50</a>)</span>. Following
 alignment, it is possible to again quantify expression using
 <em>Salmon</em> and import the data into R/Bioconductor using <em>tximeta</em>.
 A systematic evaluation of quantification using the Nanopore
-long read technology has been performed by <span class="citation">Soneson et al. (<a href="#ref-Soneson2019">2019</a>)</span>.
+long read technology has been performed by <span class="citation">(<a href="#ref-Soneson2019">51</a>)</span>.
 A pipeline for long read mapping with <em>minimap2</em> and
 quantification with <em>Salmon</em> has been recently published
 with an associated <a href="https://bit.ly/3403pVc">GitHub repository</a>
-<span class="citation">(Cruz-Garcia et al. <a href="#ref-CruzGarcia2019">2019</a>)</span>. Finally, a review of bioinformatic pipelines
+<span class="citation">(<a href="#ref-CruzGarcia2019">52</a>)</span>. Finally, a review of bioinformatic pipelines
 for long read data analysis has recently been published
-by <span class="citation">Amarasinghe et al. (<a href="#ref-Amarasinghe2020">2020</a>)</span>.</li>
+by <span class="citation">(<a href="#ref-Amarasinghe2020">53</a>)</span>.</li>
 <li><strong>Genetic variation</strong> - An aspect not explored in the previous
 sections was genetic variation across the samples in the exonic
 sequence. One analysis of interest is to identify common genetic
 variants in the exonic sequence, and to quantify, among the
 samples that are heterozygous for a given exonic SNP, the
 expression of each allele. Best practices for allelic expression
-analysis have been presented by <span class="citation">Castel et al. (<a href="#ref-Castel2015">2015</a>)</span>, and an evaluation
+analysis have been presented by <span class="citation">(<a href="#ref-Castel2015">54</a>)</span>, and an evaluation
 of EM-based methods for assessing allelic expression have been
-proposed and compared by <span class="citation">Raghupathy et al. (<a href="#ref-Raghupathy2018">2018</a>)</span>. Aside from interest in
+proposed and compared by <span class="citation">(<a href="#ref-Raghupathy2018">55</a>)</span>. Aside from interest in
 quantifying allelic expression in the presence of heterozygous
-exonic positions, <span class="citation">A. Srivastava, Malik, Sarkar, et al. (<a href="#ref-Srivastava2019Align">2019</a>)</span> have examined the effect
+exonic positions, <span class="citation">(<a href="#ref-Srivastava2019Align">56</a>)</span> have examined the effect
 of genetic variation on transcript and gene expression
 quantification.</li>
 <li><p><strong>Microbiome</strong> - I have described here various methods for analyzing
@@ -255,75 +255,75 @@ of taxa that can be assumed roughly equally abundant across all
 samples in a dataset. In addition, there may be too few taxa, such
 that the Poisson modeling assumption no longer makes sense, and so
 a compositional model may better capture the distributional
-properties <span class="citation">(Fernandes et al. <a href="#ref-Fernandes2014">2014</a>)</span>. A recent benchmarking effort compares
+properties <span class="citation">(<a href="#ref-Fernandes2014">57</a>)</span>. A recent benchmarking effort compares
 compositional methods as well as single cell RNA-seq methods for
 analyzing microbiome datasets for differences in abundance of taxa
-<span class="citation">(Calgaro et al. <a href="#ref-Calgaro2020">2020</a>)</span>.</p>
+<span class="citation">(<a href="#ref-Calgaro2020">58</a>)</span>.</p>
 <p>Alternative pipelines for analyzing microbiome abundance data
-have been detailed by <span class="citation">Callahan et al. (<a href="#ref-Callahan2016">2016</a>)</span>. There may be more interesting
+have been detailed by <span class="citation">(<a href="#ref-Callahan2016">59</a>)</span>. There may be more interesting
 and relevant approaches to modeling the counts besides the GLM, and
 latent variable models are considered and applied to microbiome
-datasets recently by <span class="citation">Sankaran and Holmes (<a href="#ref-Sankaran2018">2018</a>)</span>. Finally, statistical
+datasets recently by <span class="citation">(<a href="#ref-Sankaran2018">60</a>)</span>. Finally, statistical
 considerations of various diversity measures for count-based
-microbiome studies have been explored recently by <span class="citation">Willis (<a href="#ref-Willis2019">2019</a>)</span>.</p></li>
+microbiome studies have been explored recently by <span class="citation">(<a href="#ref-Willis2019">61</a>)</span>.</p></li>
 </ol>
 
 </div>
 <h3> References</h3>
 <div id="refs" class="references">
-<div id="ref-Amarasinghe2020">
-<p>Amarasinghe, Shanika L., Shian Su, Xueyi Dong, Luke Zappia, Matthew E. Ritchie, and Quentin Gouil. 2020. “Opportunities and Challenges in Long-Read Sequencing Data Analysis.” <em>Genome Biology</em> 21 (1): 30. <a href="https://doi.org/10.1186/s13059-020-1935-5">https://doi.org/10.1186/s13059-020-1935-5</a>.</p>
+<div id="ref-Srivastava2019">
+<p>10. Srivastava A, Malik L, Smith TS, Sudbery I, Patro R. 2019. Alevin efficiently estimates accurate gene abundances from dscRNA-seq data. <em>Genome Biology</em>. 20(65):</p>
 </div>
 <div id="ref-Amezquita2020">
-<p>Amezquita, Robert A., Aaron T. L. Lun, Etienne Becht, Vince J. Carey, Lindsay N. Carpp, Ludwig Geistlinger, Federico Marini, et al. 2020. “Orchestrating Single-Cell Analysis with Bioconductor.” <em>Nature Methods</em> 17 (2): 137–45. <a href="https://doi.org/10.1038/s41592-019-0654-x">https://doi.org/10.1038/s41592-019-0654-x</a>.</p>
-</div>
-<div id="ref-Calgaro2020">
-<p>Calgaro, Matteo, Chiara Romualdi, Levi Waldron, Davide Risso, and Nicola Vitulo. 2020. “Assessment of Single Cell Rna-Seq Statistical Methods on Microbiome Data.” <em>bioRxiv</em>. <a href="https://doi.org/10.1101/2020.01.15.907964">https://doi.org/10.1101/2020.01.15.907964</a>.</p>
-</div>
-<div id="ref-Callahan2016">
-<p>Callahan, BJ, K Sankaran, JA Fukuyama, PJ McMurdie, and SP Holmes. 2016. “Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses.” <em>F1000Research</em> 5 (1492). <a href="https://doi.org/10.12688/f1000research.8986.2">https://doi.org/10.12688/f1000research.8986.2</a>.</p>
-</div>
-<div id="ref-Castel2015">
-<p>Castel, Stephane E., Ami Levy-Moonshine, Pejman Mohammadi, Eric Banks, and Tuuli Lappalainen. 2015. “Tools and Best Practices for Data Processing in Allelic Expression Analysis.” <em>Genome Biology</em> 16 (1): 195. <a href="https://doi.org/10.1186/s13059-015-0762-6">https://doi.org/10.1186/s13059-015-0762-6</a>.</p>
-</div>
-<div id="ref-CruzGarcia2019">
-<p>Cruz-Garcia, Lourdes, Grainne O’Brien, Botond Sipos, Simon Mayes, Michael Love, Daniel Turner, and Christophe Badie. 2019. “Generation of a Transcriptional Radiation Exposure Signature in Human Blood Using Long-Read Nanopore Sequencing.” <em>Radiation Research</em>, December. <a href="https://doi.org/10.1667/RR15476.1">https://doi.org/10.1667/RR15476.1</a>.</p>
-</div>
-<div id="ref-Duo2018">
-<p>Duo, A, MD Robinson, and C Soneson. 2018. “A systematic performance evaluation of clustering methods for single-cell RNA-seq data.” <em>F1000Research</em> 7 (1141). <a href="https://doi.org/10.12688/f1000research.15666.2">https://doi.org/10.12688/f1000research.15666.2</a>.</p>
-</div>
-<div id="ref-Fernandes2014">
-<p>Fernandes, Andrew D., Jennifer NS Reid, Jean M. Macklaim, Thomas A. McMurrough, David R. Edgell, and Gregory B. Gloor. 2014. “Unifying the analysis of high-throughput sequencing datasets: characterizing RNA-seq, 16S rRNA gene sequencing and selective growth experiments by compositional data analysis.” <em>Microbiome</em> 2 (1): 15. <a href="https://doi.org/10.1186/2049-2618-2-15">https://doi.org/10.1186/2049-2618-2-15</a>.</p>
-</div>
-<div id="ref-Li2018">
-<p>Li, Heng. 2018. “Minimap2: pairwise alignment for nucleotide sequences.” <em>Bioinformatics</em> 34 (18): 3094–3100. <a href="https://doi.org/10.1093/bioinformatics/bty191">https://doi.org/10.1093/bioinformatics/bty191</a>.</p>
-</div>
-<div id="ref-Raghupathy2018">
-<p>Raghupathy, Narayanan, Kwangbom Choi, Matthew J Vincent, Glen L Beane, Keith S Sheppard, Steven C Munger, Ron Korstanje, Fernando Pardo-Manual de Villena, and Gary A Churchill. 2018. “Hierarchical analysis of RNA-seq reads improves the accuracy of allele-specific expression.” <em>Bioinformatics</em> 34 (13): 2177–84. <a href="https://doi.org/10.1093/bioinformatics/bty078">https://doi.org/10.1093/bioinformatics/bty078</a>.</p>
-</div>
-<div id="ref-Sankaran2018">
-<p>Sankaran, Kris, and Susan P Holmes. 2018. “Latent variable modeling for the microbiome.” <em>Biostatistics</em> 20 (4): 599–614. <a href="https://doi.org/10.1093/biostatistics/kxy018">https://doi.org/10.1093/biostatistics/kxy018</a>.</p>
+<p>45. Amezquita RA, Lun ATL, Becht E, Carey VJ, Carpp LN, et al. 2020. Orchestrating single-cell analysis with bioconductor. <em>Nature Methods</em>. 17(2):137–45</p>
 </div>
 <div id="ref-Soneson2018">
-<p>Soneson, Charlotte, and Mark D. Robinson. 2018. “Bias, Robustness and Scalability in Single-Cell Differential Expression Analysis.” <em>Nature Methods</em> 15 (4): 255–61. <a href="https://doi.org/10.1038/nmeth.4612">https://doi.org/10.1038/nmeth.4612</a>.</p>
-</div>
-<div id="ref-Soneson2019">
-<p>Soneson, Charlotte, Yao Yao, Anna Bratus-Neuenschwander, Andrea Patrignani, Mark D. Robinson, and Shobbir Hussain. 2019. “A comprehensive examination of Nanopore native RNA sequencing for characterization of complex transcriptomes.” <em>Nature Communications</em> 10 (1): 3359. <a href="https://doi.org/10.1038/s41467-019-11272-z">https://doi.org/10.1038/s41467-019-11272-z</a>.</p>
-</div>
-<div id="ref-Srivastava2019Align">
-<p>Srivastava, Avi, Laraib Malik, Hirak Sarkar, Mohsen Zakeri, Fatemeh Almodaresi, Charlotte Soneson, Michael I. Love, Carl Kingsford, and Rob Patro. 2019. “Alignment and Mapping Methodology Influence Transcript Abundance Estimation.” <em>bioRxiv</em>. Cold Spring Harbor Laboratory. <a href="https://doi.org/10.1101/657874">https://doi.org/10.1101/657874</a>.</p>
-</div>
-<div id="ref-Srivastava2019">
-<p>Srivastava, Avi, Laraib Malik, Tom Sean Smith, Ian Sudbery, and Rob Patro. 2019. “Alevin efficiently estimates accurate gene abundances from dscRNA-seq data.” <em>Genome Biology</em> 20 (65). <a href="https://doi.org/10.1186/s13059-019-1670-y">https://doi.org/10.1186/s13059-019-1670-y</a>.</p>
+<p>46. Soneson C, Robinson MD. 2018. Bias, robustness and scalability in single-cell differential expression analysis. <em>Nature Methods</em>. 15(4):255–61</p>
 </div>
 <div id="ref-Sun2019">
-<p>Sun, Shiquan, Jiaqiang Zhu, Ying Ma, and Xiang Zhou. 2019. “Accuracy, Robustness and Scalability of Dimensionality Reduction Methods for Single Cell RNAseq Analysis.” <em>bioRxiv</em>. Cold Spring Harbor Laboratory. <a href="https://doi.org/10.1101/641142">https://doi.org/10.1101/641142</a>.</p>
+<p>47. Sun S, Zhu J, Ma Y, Zhou X. 2019. Accuracy, Robustness and Scalability of Dimensionality Reduction Methods for Single Cell RNAseq Analysis. <em>bioRxiv</em></p>
+</div>
+<div id="ref-Duo2018">
+<p>48. Duo A, Robinson M, Soneson C. 2018. A systematic performance evaluation of clustering methods for single-cell RNA-seq data. <em>F1000Research</em>. 7(1141):</p>
 </div>
 <div id="ref-Berge2018">
-<p>Van den Berge, Koen, Fanny Perraudeau, Charlotte Soneson, Michael I Love, Davide Risso, Jean-Philippe Vert, Mark D Robinson, Sandrine Dudoit, and Lieven Clement. 2018. “Observation weights unlock bulk RNA-seq tools for zero inflation and single-cell applications.” <em>Genome Biology</em> 19 (24). <a href="https://doi.org/10.1186/s13059-018-1406-4">https://doi.org/10.1186/s13059-018-1406-4</a>.</p>
+<p>49. Van den Berge K, Perraudeau F, Soneson C, Love MI, Risso D, et al. 2018. Observation weights unlock bulk RNA-seq tools for zero inflation and single-cell applications. <em>Genome Biology</em>. 19(24):</p>
+</div>
+<div id="ref-Li2018">
+<p>50. Li H. 2018. Minimap2: pairwise alignment for nucleotide sequences. <em>Bioinformatics</em>. 34(18):3094–3100</p>
+</div>
+<div id="ref-Soneson2019">
+<p>51. Soneson C, Yao Y, Bratus-Neuenschwander A, Patrignani A, Robinson MD, Hussain S. 2019. A comprehensive examination of Nanopore native RNA sequencing for characterization of complex transcriptomes. <em>Nature Communications</em>. 10(1):3359</p>
+</div>
+<div id="ref-CruzGarcia2019">
+<p>52. Cruz-Garcia L, O’Brien G, Sipos B, Mayes S, Love M, et al. 2019. Generation of a transcriptional radiation exposure signature in human blood using long-read nanopore sequencing. <em>Radiation research</em></p>
+</div>
+<div id="ref-Amarasinghe2020">
+<p>53. Amarasinghe SL, Su S, Dong X, Zappia L, Ritchie ME, Gouil Q. 2020. Opportunities and challenges in long-read sequencing data analysis. <em>Genome Biology</em>. 21(1):30</p>
+</div>
+<div id="ref-Castel2015">
+<p>54. Castel SE, Levy-Moonshine A, Mohammadi P, Banks E, Lappalainen T. 2015. Tools and best practices for data processing in allelic expression analysis. <em>Genome Biology</em>. 16(1):195</p>
+</div>
+<div id="ref-Raghupathy2018">
+<p>55. Raghupathy N, Choi K, Vincent MJ, Beane GL, Sheppard KS, et al. 2018. Hierarchical analysis of RNA-seq reads improves the accuracy of allele-specific expression. <em>Bioinformatics</em>. 34(13):2177–84</p>
+</div>
+<div id="ref-Srivastava2019Align">
+<p>56. Srivastava A, Malik L, Sarkar H, Zakeri M, Almodaresi F, et al. 2019. Alignment and mapping methodology influence transcript abundance estimation. <em>bioRxiv</em></p>
+</div>
+<div id="ref-Fernandes2014">
+<p>57. Fernandes AD, Reid JN, Macklaim JM, McMurrough TA, Edgell DR, Gloor GB. 2014. Unifying the analysis of high-throughput sequencing datasets: characterizing RNA-seq, 16S rRNA gene sequencing and selective growth experiments by compositional data analysis. <em>Microbiome</em>. 2(1):15</p>
+</div>
+<div id="ref-Calgaro2020">
+<p>58. Calgaro M, Romualdi C, Waldron L, Risso D, Vitulo N. 2020. Assessment of single cell rna-seq statistical methods on microbiome data. <em>bioRxiv</em></p>
+</div>
+<div id="ref-Callahan2016">
+<p>59. Callahan B, Sankaran K, Fukuyama J, McMurdie P, Holmes S. 2016. Bioconductor Workflow for Microbiome Data Analysis: from raw reads to community analyses. <em>F1000Research</em>. 5(1492):</p>
+</div>
+<div id="ref-Sankaran2018">
+<p>60. Sankaran K, Holmes SP. 2018. Latent variable modeling for the microbiome. <em>Biostatistics</em>. 20(4):599–614</p>
 </div>
 <div id="ref-Willis2019">
-<p>Willis, Amy D. 2019. “Rarefaction, Alpha Diversity, and Statistics.” <em>Frontiers in Microbiology</em> 10: 2407. <a href="https://doi.org/10.3389/fmicb.2019.02407">https://doi.org/10.3389/fmicb.2019.02407</a>.</p>
+<p>61. Willis AD. 2019. Rarefaction, alpha diversity, and statistics. <em>Frontiers in Microbiology</em>. 10:2407</p>
 </div>
 </div>
             </section>

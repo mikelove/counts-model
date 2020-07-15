@@ -164,7 +164,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="session" class="section level1">
 <h1><span class="header-section-number">Chapter 5</span> Session information</h1>
-<div class="sourceCode" id="cb117"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb117-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
+<div class="sourceCode" id="cb111"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb111-1" data-line-number="1"><span class="kw">sessionInfo</span>()</a></code></pre></div>
 <pre><code>## R version 4.0.0 (2020-04-24)
 ## Platform: x86_64-apple-darwin17.0 (64-bit)
 ## Running under: macOS Catalina 10.15.5
@@ -181,67 +181,82 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## [7] utils     methods   base     
 ## 
 ## other attached packages:
-##  [1] fishpond_1.5.33             IHW_1.17.0                 
-##  [3] ggrepel_0.8.2               ggplot2_3.3.0              
-##  [5] DESeq2_1.29.3               rafalib_1.0.0              
-##  [7] org.Mm.eg.db_3.11.1         AnnotationDbi_1.51.0       
-##  [9] SummarizedExperiment_1.19.2 DelayedArray_0.15.1        
-## [11] matrixStats_0.56.0          Biobase_2.49.0             
-## [13] GenomicRanges_1.41.1        GenomeInfoDb_1.25.0        
-## [15] IRanges_2.23.4              S4Vectors_0.27.5           
-## [17] BiocGenerics_0.35.4         tximeta_1.7.3              
-## [19] dplyr_0.8.5                 readr_1.3.1                
+##  [1] apeglm_1.11.0               GenomicFeatures_1.41.0     
+##  [3] bookdown_0.20               BiocParallel_1.23.0        
+##  [5] testthat_2.3.2              rmarkdown_2.3              
+##  [7] devtools_2.3.0              usethis_1.6.1              
+##  [9] fishpond_1.5.33             IHW_1.17.0                 
+## [11] ggrepel_0.8.2               ggplot2_3.3.0              
+## [13] DESeq2_1.29.3               rafalib_1.0.0              
+## [15] org.Mm.eg.db_3.11.1         AnnotationDbi_1.51.0       
+## [17] SummarizedExperiment_1.19.2 DelayedArray_0.15.1        
+## [19] matrixStats_0.56.0          Biobase_2.49.0             
+## [21] GenomicRanges_1.41.1        GenomeInfoDb_1.25.0        
+## [23] IRanges_2.23.4              S4Vectors_0.27.5           
+## [25] BiocGenerics_0.35.4         tximeta_1.7.3              
+## [27] dplyr_0.8.5                 readr_1.3.1                
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] colorspace_1.4-1              ellipsis_0.3.0               
-##  [3] XVector_0.29.0                rstudioapi_0.11              
-##  [5] farver_2.0.3                  bit64_0.9-7                  
-##  [7] interactiveDisplayBase_1.27.0 fansi_0.4.1                  
-##  [9] splines_4.0.0                 tximport_1.17.0              
-## [11] geneplotter_1.67.0            knitr_1.28                   
-## [13] jsonlite_1.6.1                Rsamtools_2.5.0              
-## [15] annotate_1.67.0               dbplyr_1.4.3                 
-## [17] shiny_1.4.0.2                 BiocManager_1.30.10          
-## [19] compiler_4.0.0                httr_1.4.1                   
-## [21] assertthat_0.2.1              Matrix_1.2-18                
-## [23] fastmap_1.0.1                 lazyeval_0.2.2               
-## [25] cli_2.0.2                     later_1.0.0                  
-## [27] htmltools_0.4.0               prettyunits_1.1.1            
-## [29] tools_4.0.0                   gtable_0.3.0                 
-## [31] glue_1.4.0                    GenomeInfoDbData_1.2.3       
-## [33] rappdirs_0.3.1                Rcpp_1.0.4.6                 
-## [35] slam_0.1-47                   vctrs_0.2.4                  
-## [37] Biostrings_2.57.0             rtracklayer_1.49.3           
-## [39] xfun_0.13                     stringr_1.4.0                
-## [41] mime_0.9                      lifecycle_0.2.0              
-## [43] ensembldb_2.13.1              gtools_3.8.2                 
-## [45] XML_3.99-0.3                  AnnotationHub_2.21.0         
-## [47] zlibbioc_1.35.0               scales_1.1.1                 
-## [49] hms_0.5.3                     promises_1.1.0               
-## [51] ProtGenerics_1.21.0           AnnotationFilter_1.13.0      
-## [53] RColorBrewer_1.1-2            yaml_2.2.1                   
-## [55] curl_4.3                      memoise_1.1.0                
-## [57] biomaRt_2.45.0                stringi_1.4.6                
-## [59] RSQLite_2.2.0                 BiocVersion_3.12.0           
-## [61] genefilter_1.71.0             GenomicFeatures_1.41.0       
-## [63] BiocParallel_1.23.0           rlang_0.4.6                  
-## [65] pkgconfig_2.0.3               bitops_1.0-6                 
-## [67] evaluate_0.14                 lattice_0.20-41              
-## [69] lpsymphony_1.17.0             purrr_0.3.4                  
-## [71] GenomicAlignments_1.25.0      labeling_0.3                 
-## [73] bit_1.1-15.2                  tidyselect_1.0.0             
-## [75] magrittr_1.5                  bookdown_0.20                
-## [77] R6_2.4.1                      DBI_1.1.0                    
-## [79] pillar_1.4.4                  withr_2.2.0                  
-## [81] survival_3.1-12               RCurl_1.98-1.2               
-## [83] tibble_3.0.1                  crayon_1.3.4                 
-## [85] fdrtool_1.2.15                utf8_1.1.4                   
-## [87] BiocFileCache_1.13.0          rmarkdown_2.3                
-## [89] progress_1.2.2                locfit_1.5-9.4               
-## [91] grid_4.0.0                    blob_1.2.1                   
-## [93] digest_0.6.25                 xtable_1.8-4                 
-## [95] httpuv_1.5.2                  openssl_1.4.1                
-## [97] munsell_0.5.0                 askpass_1.1</code></pre>
+##   [1] backports_1.1.6               AnnotationHub_2.21.0         
+##   [3] BiocFileCache_1.13.0          servr_0.17                   
+##   [5] plyr_1.8.6                    lazyeval_0.2.2               
+##   [7] splines_4.0.0                 lpsymphony_1.17.0            
+##   [9] digest_0.6.25                 ensembldb_2.13.1             
+##  [11] htmltools_0.4.0               fansi_0.4.1                  
+##  [13] magrittr_1.5                  memoise_1.1.0                
+##  [15] remotes_2.1.1                 Biostrings_2.57.0            
+##  [17] annotate_1.67.0               askpass_1.1                  
+##  [19] bdsmatrix_1.3-4               prettyunits_1.1.1            
+##  [21] colorspace_1.4-1              blob_1.2.1                   
+##  [23] rappdirs_0.3.1                xfun_0.13                    
+##  [25] callr_3.4.3                   crayon_1.3.4                 
+##  [27] RCurl_1.98-1.2                jsonlite_1.6.1               
+##  [29] tximport_1.17.0               genefilter_1.71.0            
+##  [31] survival_3.1-12               glue_1.4.0                   
+##  [33] gtable_0.3.0                  zlibbioc_1.35.0              
+##  [35] XVector_0.29.0                pkgbuild_1.0.8               
+##  [37] abind_1.4-5                   scales_1.1.1                 
+##  [39] mvtnorm_1.1-0                 DBI_1.1.0                    
+##  [41] Rcpp_1.0.4.6                  xtable_1.8-4                 
+##  [43] progress_1.2.2                emdbook_1.3.12               
+##  [45] bit_1.1-15.2                  httr_1.4.1                   
+##  [47] RColorBrewer_1.1-2            ellipsis_0.3.0               
+##  [49] pkgconfig_2.0.3               XML_3.99-0.3                 
+##  [51] farver_2.0.3                  dbplyr_1.4.3                 
+##  [53] locfit_1.5-9.4                utf8_1.1.4                   
+##  [55] reshape2_1.4.4                tidyselect_1.0.0             
+##  [57] labeling_0.3                  rlang_0.4.6                  
+##  [59] later_1.0.0                   munsell_0.5.0                
+##  [61] BiocVersion_3.12.0            tools_4.0.0                  
+##  [63] cli_2.0.2                     RSQLite_2.2.0                
+##  [65] fdrtool_1.2.15                evaluate_0.14                
+##  [67] stringr_1.4.0                 fastmap_1.0.1                
+##  [69] yaml_2.2.1                    processx_3.4.2               
+##  [71] knitr_1.28                    bit64_0.9-7                  
+##  [73] fs_1.4.1                      purrr_0.3.4                  
+##  [75] AnnotationFilter_1.13.0       mime_0.9                     
+##  [77] slam_0.1-47                   biomaRt_2.45.0               
+##  [79] compiler_4.0.0                rstudioapi_0.11              
+##  [81] curl_4.3                      interactiveDisplayBase_1.27.0
+##  [83] tibble_3.0.1                  geneplotter_1.67.0           
+##  [85] stringi_1.4.6                 ps_1.3.3                     
+##  [87] desc_1.2.0                    lattice_0.20-41              
+##  [89] ProtGenerics_1.21.0           Matrix_1.2-18                
+##  [91] vctrs_0.2.4                   pillar_1.4.4                 
+##  [93] lifecycle_0.2.0               BiocManager_1.30.10          
+##  [95] bitops_1.0-6                  qvalue_2.21.0                
+##  [97] httpuv_1.5.2                  rtracklayer_1.49.3           
+##  [99] R6_2.4.1                      promises_1.1.0               
+## [101] codetools_0.2-16              sessioninfo_1.1.1            
+## [103] MASS_7.3-51.6                 gtools_3.8.2                 
+## [105] assertthat_0.2.1              pkgload_1.0.2                
+## [107] openssl_1.4.1                 rprojroot_1.3-2              
+## [109] withr_2.2.0                   GenomicAlignments_1.25.0     
+## [111] Rsamtools_2.5.0               GenomeInfoDbData_1.2.3       
+## [113] hms_0.5.3                     grid_4.0.0                   
+## [115] coda_0.19-3                   bbmle_1.0.23.1               
+## [117] numDeriv_2016.8-1.1           shiny_1.4.0.2                
+## [119] tinytex_0.22</code></pre>
 
 </div>
             </section>

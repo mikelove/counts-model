@@ -170,19 +170,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 often used to analyze RNA-seq data, in particular gene-level count
 matrices. I will then use the <em>DESeq2</em> package to calculate
 scaling factors, estimate biological dispersion within groups of
-samples, and perform differential testing per gene <span class="citation">(Love, Huber, and Anders <a href="#ref-Love2014">2014</a>)</span>.</p>
+samples, and perform differential testing per gene <span class="citation">(<a href="#ref-Love2014">14</a>)</span>.</p>
 <p>Some other popular Bioconductor packages for RNA-seq analysis include the
-<em>edgeR</em> package <span class="citation">(Robinson, McCarthy, and Smyth <a href="#ref-Robinson2010">2010</a>; McCarthy, Chen, and Smyth <a href="#ref-McCarthy2012">2012</a>)</span> and the <em>limma-voom</em>
-method in the <em>limma</em> package <span class="citation">(Law et al. <a href="#ref-Law2014">2014</a>)</span>. The approach taken by
+<em>edgeR</em> package <span class="citation">(<a href="#ref-Robinson2010">15</a>, <a href="#ref-McCarthy2012">16</a>)</span> and the <em>limma-voom</em>
+method in the <em>limma</em> package <span class="citation">(<a href="#ref-Law2014">17</a>)</span>. The approach taken by
 <em>DESeq2</em> for estimation of dispersion is similar to the method
-proposed by <span class="citation">Wu, Wang, and Wu (<a href="#ref-Wu2012">2012</a>)</span> in the <em>DSS</em> Bioconductor package.</p>
+proposed by <span class="citation">(<a href="#ref-Wu2012">18</a>)</span> in the <em>DSS</em> Bioconductor package.</p>
 <p>I will begin by investigating the estimated counts that were imported
 from the <em>Salmon</em> software, and comparing these counts across and
 within samples. I will note the varying precision that the counts
 offer for log ratio comparisons between samples. Finally, I will
 perform per-gene testing for differential expression using the
 <em>DESeq2</em> package, and multiple test correction, including the <em>IHW</em>
-method <span class="citation">(Ignatiadis et al. <a href="#ref-Ignatiadis2016">2016</a>)</span>. Note that the first section of this chapter
+method <span class="citation">(<a href="#ref-Ignatiadis2016">19</a>)</span>. Note that the first section of this chapter
 includes code and plots that are not typically performed during
 RNA-seq analysis, but mostly for introducing the reader to some basic
 properties of RNA-seq count matrices.</p>
@@ -192,11 +192,11 @@ typical mammalian RNA-seq experiment, we might expect tens of millions
 of fragments per sample, which are distributed across tens of
 thousands of genes, although there is inevitably a range of sequencing
 depth for each sample:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1"><span class="kw">assayNames</span>(gse)</a></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb37-1" data-line-number="1"><span class="kw">assayNames</span>(gse)</a></code></pre></div>
 <pre><code>## [1] &quot;counts&quot;    &quot;abundance&quot; &quot;length&quot;</code></pre>
-<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" data-line-number="1">cs &lt;-<span class="st"> </span><span class="kw">colSums</span>(<span class="kw">assay</span>(gse, <span class="st">&quot;counts&quot;</span>))</a>
-<a class="sourceLine" id="cb45-2" data-line-number="2"><span class="kw">hist</span>(cs<span class="op">/</span><span class="fl">1e6</span>, <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>, <span class="dt">border=</span><span class="st">&quot;white&quot;</span>,</a>
-<a class="sourceLine" id="cb45-3" data-line-number="3">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;column sums (per million)&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb39-1" data-line-number="1">cs &lt;-<span class="st"> </span><span class="kw">colSums</span>(<span class="kw">assay</span>(gse, <span class="st">&quot;counts&quot;</span>))</a>
+<a class="sourceLine" id="cb39-2" data-line-number="2"><span class="kw">hist</span>(cs<span class="op">/</span><span class="fl">1e6</span>, <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>, <span class="dt">border=</span><span class="st">&quot;white&quot;</span>,</a>
+<a class="sourceLine" id="cb39-3" data-line-number="3">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;column sums (per million)&quot;</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/colsums-1.png" width="672" /></p>
 <p>Let us first consider just two samples, one from the OCT4 untreated
 group and one from the OCT4 treated group. I will make a plot
@@ -213,24 +213,24 @@ the length of the feature) does not estimate the proportion of
 <em>molecules</em>. The <code>abundance</code> assay of the <code>gse</code> object contains
 estimates of the proportions of the molecules, in transcripts per
 million (TPM). For more on how these estimates are computed, consult
-the <em>Salmon</em> paper <span class="citation">(Patro et al. <a href="#ref-Patro2017">2017</a>)</span>.</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb46-1" data-line-number="1">cts &lt;-<span class="st"> </span><span class="kw">assay</span>(gse, <span class="st">&quot;counts&quot;</span>)[,<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">4</span>)]</a>
-<a class="sourceLine" id="cb46-2" data-line-number="2">idx &lt;-<span class="st"> </span><span class="kw">rowSums</span>(cts <span class="op">&gt;=</span><span class="st"> </span><span class="dv">5</span>) <span class="op">==</span><span class="st"> </span><span class="dv">2</span></a>
-<a class="sourceLine" id="cb46-3" data-line-number="3">cts &lt;-<span class="st"> </span>cts[idx,]</a>
-<a class="sourceLine" id="cb46-4" data-line-number="4">p &lt;-<span class="st"> </span><span class="kw">sweep</span>(cts, <span class="dv">2</span>, <span class="kw">colSums</span>(cts), <span class="st">&quot;/&quot;</span>)</a></code></pre></div>
+the <em>Salmon</em> paper <span class="citation">(<a href="#ref-Patro2017">6</a>)</span>.</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb40-1" data-line-number="1">cts &lt;-<span class="st"> </span><span class="kw">assay</span>(gse, <span class="st">&quot;counts&quot;</span>)[,<span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">4</span>)]</a>
+<a class="sourceLine" id="cb40-2" data-line-number="2">idx &lt;-<span class="st"> </span><span class="kw">rowSums</span>(cts <span class="op">&gt;=</span><span class="st"> </span><span class="dv">5</span>) <span class="op">==</span><span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb40-3" data-line-number="3">cts &lt;-<span class="st"> </span>cts[idx,]</a>
+<a class="sourceLine" id="cb40-4" data-line-number="4">p &lt;-<span class="st"> </span><span class="kw">sweep</span>(cts, <span class="dv">2</span>, <span class="kw">colSums</span>(cts), <span class="st">&quot;/&quot;</span>)</a></code></pre></div>
 <p>We can examine the ratio of the proportions for each gene, over the
 geometric mean, using the <code>maplot</code> function from the <em>rafalib</em>
 package. We will plot the ratio and the geometric mean of proportions
 both on the log scale. <code>maplot</code> is a basic function for making an
 “MA-plot” which has been used in transcriptomics since at least the
-early 2000s when it was used for microarray datasets <span class="citation">(Dudoit et al. <a href="#ref-Dudoit2002">2002</a>; Roberts et al. <a href="#ref-Roberts2000">2000</a>)</span>. Later I will show a specialized MA-plot function for
+early 2000s when it was used for microarray datasets <span class="citation">(<a href="#ref-Dudoit2002">20</a>, <a href="#ref-Roberts2000">21</a>)</span>. Later I will show a specialized MA-plot function for
 RNA-seq data in <em>DESeq2</em>.</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" data-line-number="1"><span class="kw">library</span>(rafalib)</a>
-<a class="sourceLine" id="cb47-2" data-line-number="2"><span class="kw">maplot</span>(<span class="kw">log10</span>(p[,<span class="dv">1</span>]), <span class="kw">log10</span>(p[,<span class="dv">2</span>]), <span class="dt">n=</span><span class="kw">nrow</span>(p), </a>
-<a class="sourceLine" id="cb47-3" data-line-number="3">       <span class="dt">cex=</span>.<span class="dv">3</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb47-4" data-line-number="4">       <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>, </a>
-<a class="sourceLine" id="cb47-5" data-line-number="5">       <span class="dt">ylab=</span><span class="st">&quot;log10 fold change&quot;</span>)</a>
-<a class="sourceLine" id="cb47-6" data-line-number="6"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">5</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb41-1" data-line-number="1"><span class="kw">library</span>(rafalib)</a>
+<a class="sourceLine" id="cb41-2" data-line-number="2"><span class="kw">maplot</span>(<span class="kw">log10</span>(p[,<span class="dv">1</span>]), <span class="kw">log10</span>(p[,<span class="dv">2</span>]), <span class="dt">n=</span><span class="kw">nrow</span>(p), </a>
+<a class="sourceLine" id="cb41-3" data-line-number="3">       <span class="dt">cex=</span>.<span class="dv">3</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">2</span>),</a>
+<a class="sourceLine" id="cb41-4" data-line-number="4">       <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>, </a>
+<a class="sourceLine" id="cb41-5" data-line-number="5">       <span class="dt">ylab=</span><span class="st">&quot;log10 fold change&quot;</span>)</a>
+<a class="sourceLine" id="cb41-6" data-line-number="6"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">5</span>))</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/maplot-1.png" width="672" /></p>
 <p>The red line is a smooth curve through the log ratios (here
 <span class="math inline">\(\log_{10}\)</span>, although we will later switch to <span class="math inline">\(\log_2\)</span> for more
@@ -249,17 +249,17 @@ proportions). We see that most genes that we are considering fall in
 the range from 1/10,000,000 (-7) to 1/10,000 (-4) of the total
 count. That these ratios are very low is relevant for the choice of
 statistical distribution for the counts.</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1">mean.log.p &lt;-<span class="st"> </span><span class="kw">rowMeans</span>(<span class="kw">log10</span>(p))</a>
-<a class="sourceLine" id="cb48-2" data-line-number="2"><span class="kw">hist</span>(mean.log.p,  <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>, <span class="dt">border=</span><span class="st">&quot;white&quot;</span>,</a>
-<a class="sourceLine" id="cb48-3" data-line-number="3">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb42-1" data-line-number="1">mean.log.p &lt;-<span class="st"> </span><span class="kw">rowMeans</span>(<span class="kw">log10</span>(p))</a>
+<a class="sourceLine" id="cb42-2" data-line-number="2"><span class="kw">hist</span>(mean.log.p,  <span class="dt">col=</span><span class="st">&quot;grey&quot;</span>, <span class="dt">border=</span><span class="st">&quot;white&quot;</span>,</a>
+<a class="sourceLine" id="cb42-3" data-line-number="3">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/mean-prob-1.png" width="672" /></p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb49-1" data-line-number="1"><span class="kw">library</span>(rafalib)</a>
-<a class="sourceLine" id="cb49-2" data-line-number="2"><span class="kw">maplot</span>(<span class="kw">log10</span>(p[,<span class="dv">1</span>]), <span class="kw">log10</span>(p[,<span class="dv">2</span>]), <span class="dt">n=</span><span class="kw">nrow</span>(p),</a>
-<a class="sourceLine" id="cb49-3" data-line-number="3">       <span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span><span class="fl">6.5</span>, <span class="fl">-3.5</span>), <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>,<span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb49-4" data-line-number="4">       <span class="dt">cex=</span>.<span class="dv">3</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb49-5" data-line-number="5">       <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>, </a>
-<a class="sourceLine" id="cb49-6" data-line-number="6">       <span class="dt">ylab=</span><span class="st">&quot;log10 fold change&quot;</span>)</a>
-<a class="sourceLine" id="cb49-7" data-line-number="7"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">5</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb43-1" data-line-number="1"><span class="kw">library</span>(rafalib)</a>
+<a class="sourceLine" id="cb43-2" data-line-number="2"><span class="kw">maplot</span>(<span class="kw">log10</span>(p[,<span class="dv">1</span>]), <span class="kw">log10</span>(p[,<span class="dv">2</span>]), <span class="dt">n=</span><span class="kw">nrow</span>(p),</a>
+<a class="sourceLine" id="cb43-3" data-line-number="3">       <span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span><span class="fl">6.5</span>, <span class="fl">-3.5</span>), <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">2</span>,<span class="dv">2</span>),</a>
+<a class="sourceLine" id="cb43-4" data-line-number="4">       <span class="dt">cex=</span>.<span class="dv">3</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">2</span>),</a>
+<a class="sourceLine" id="cb43-5" data-line-number="5">       <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>, </a>
+<a class="sourceLine" id="cb43-6" data-line-number="6">       <span class="dt">ylab=</span><span class="st">&quot;log10 fold change&quot;</span>)</a>
+<a class="sourceLine" id="cb43-7" data-line-number="7"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">5</span>))</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/maplot2-1.png" width="672" /></p>
 <p>I will zoom out on the y-axis and zoom in on the x-axis on the MA-plot
 to emphasize that, for the range containing most of the genes,
@@ -272,12 +272,12 @@ is to use <span class="math inline">\(\log_2\)</span>, as we can easily interpre
 quadrupling, etc. Now I calculate the <span class="math inline">\(\log_2\)</span> ratio of proportions
 and plot the histogram of these log ratios, for genes where the log10
 mean proportion is between -6 and -4:</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1">lfc &lt;-<span class="st"> </span><span class="kw">log2</span>(p[,<span class="dv">2</span>]) <span class="op">-</span><span class="st"> </span><span class="kw">log2</span>(p[,<span class="dv">1</span>])</a>
-<a class="sourceLine" id="cb50-2" data-line-number="2"><span class="kw">hist</span>(lfc[<span class="kw">between</span>(mean.log.p, <span class="dv">-6</span>, <span class="dv">-4</span>)], </a>
-<a class="sourceLine" id="cb50-3" data-line-number="3">     <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="dt">by=</span>.<span class="dv">1</span>),</a>
-<a class="sourceLine" id="cb50-4" data-line-number="4">     <span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">5</span>,<span class="dv">5</span>),</a>
-<a class="sourceLine" id="cb50-5" data-line-number="5">     <span class="dt">col=</span><span class="st">&quot;grey50&quot;</span>, <span class="dt">border=</span><span class="st">&quot;white&quot;</span>,</a>
-<a class="sourceLine" id="cb50-6" data-line-number="6">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;log2 fold change of proportion&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb44-1" data-line-number="1">lfc &lt;-<span class="st"> </span><span class="kw">log2</span>(p[,<span class="dv">2</span>]) <span class="op">-</span><span class="st"> </span><span class="kw">log2</span>(p[,<span class="dv">1</span>])</a>
+<a class="sourceLine" id="cb44-2" data-line-number="2"><span class="kw">hist</span>(lfc[<span class="kw">between</span>(mean.log.p, <span class="dv">-6</span>, <span class="dv">-4</span>)], </a>
+<a class="sourceLine" id="cb44-3" data-line-number="3">     <span class="dt">breaks=</span><span class="kw">seq</span>(<span class="op">-</span><span class="dv">10</span>,<span class="dv">10</span>,<span class="dt">by=</span>.<span class="dv">1</span>),</a>
+<a class="sourceLine" id="cb44-4" data-line-number="4">     <span class="dt">xlim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">5</span>,<span class="dv">5</span>),</a>
+<a class="sourceLine" id="cb44-5" data-line-number="5">     <span class="dt">col=</span><span class="st">&quot;grey50&quot;</span>, <span class="dt">border=</span><span class="st">&quot;white&quot;</span>,</a>
+<a class="sourceLine" id="cb44-6" data-line-number="6">     <span class="dt">main=</span><span class="st">&quot;&quot;</span>, <span class="dt">xlab=</span><span class="st">&quot;log2 fold change of proportion&quot;</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/lfc-hist-1.png" width="672" /></p>
 <p>Again we see that it’s rare for there to be an extreme change (more
 than doubling) comparing these two samples from different treatment
@@ -295,17 +295,17 @@ approximated by a Poisson distribution. So I will create two simulated
 <em>technical replicate</em> samples, by creating two draws from a Poisson
 distribution along the genes. I then repeat the same code as above,
 to examine the MA-plot for the simulated counts.</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb51-1" data-line-number="1">sim.cts &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rpois</span>(<span class="kw">nrow</span>(p) <span class="op">*</span><span class="st"> </span><span class="dv">2</span>, <span class="fl">30e6</span> <span class="op">*</span><span class="st"> </span>p[,<span class="dv">1</span>]), <span class="dt">ncol=</span><span class="dv">2</span>)</a>
-<a class="sourceLine" id="cb51-2" data-line-number="2"><span class="kw">colSums</span>(sim.cts)</a></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb45-1" data-line-number="1">sim.cts &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rpois</span>(<span class="kw">nrow</span>(p) <span class="op">*</span><span class="st"> </span><span class="dv">2</span>, <span class="fl">30e6</span> <span class="op">*</span><span class="st"> </span>p[,<span class="dv">1</span>]), <span class="dt">ncol=</span><span class="dv">2</span>)</a>
+<a class="sourceLine" id="cb45-2" data-line-number="2"><span class="kw">colSums</span>(sim.cts)</a></code></pre></div>
 <pre><code>## [1] 29994168 30001460</code></pre>
-<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" data-line-number="1">idx &lt;-<span class="st"> </span><span class="kw">rowSums</span>(sim.cts <span class="op">&gt;=</span><span class="st"> </span><span class="dv">5</span>) <span class="op">==</span><span class="st"> </span><span class="dv">2</span></a>
-<a class="sourceLine" id="cb53-2" data-line-number="2">sim.cts &lt;-<span class="st"> </span>sim.cts[idx,]</a>
-<a class="sourceLine" id="cb53-3" data-line-number="3">sim.p &lt;-<span class="st"> </span><span class="kw">sweep</span>(sim.cts, <span class="dv">2</span>, <span class="kw">colSums</span>(sim.cts), <span class="st">&quot;/&quot;</span>)</a>
-<a class="sourceLine" id="cb53-4" data-line-number="4"><span class="kw">maplot</span>(<span class="kw">log10</span>(sim.p[,<span class="dv">1</span>]), <span class="kw">log10</span>(sim.p[,<span class="dv">2</span>]), <span class="dt">n=</span><span class="kw">nrow</span>(p), </a>
-<a class="sourceLine" id="cb53-5" data-line-number="5">       <span class="dt">cex=</span>.<span class="dv">3</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">2</span>),</a>
-<a class="sourceLine" id="cb53-6" data-line-number="6">       <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>, </a>
-<a class="sourceLine" id="cb53-7" data-line-number="7">       <span class="dt">ylab=</span><span class="st">&quot;log10 fold change&quot;</span>)</a>
-<a class="sourceLine" id="cb53-8" data-line-number="8"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">5</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb47-1" data-line-number="1">idx &lt;-<span class="st"> </span><span class="kw">rowSums</span>(sim.cts <span class="op">&gt;=</span><span class="st"> </span><span class="dv">5</span>) <span class="op">==</span><span class="st"> </span><span class="dv">2</span></a>
+<a class="sourceLine" id="cb47-2" data-line-number="2">sim.cts &lt;-<span class="st"> </span>sim.cts[idx,]</a>
+<a class="sourceLine" id="cb47-3" data-line-number="3">sim.p &lt;-<span class="st"> </span><span class="kw">sweep</span>(sim.cts, <span class="dv">2</span>, <span class="kw">colSums</span>(sim.cts), <span class="st">&quot;/&quot;</span>)</a>
+<a class="sourceLine" id="cb47-4" data-line-number="4"><span class="kw">maplot</span>(<span class="kw">log10</span>(sim.p[,<span class="dv">1</span>]), <span class="kw">log10</span>(sim.p[,<span class="dv">2</span>]), <span class="dt">n=</span><span class="kw">nrow</span>(p), </a>
+<a class="sourceLine" id="cb47-5" data-line-number="5">       <span class="dt">cex=</span>.<span class="dv">3</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,.<span class="dv">2</span>),</a>
+<a class="sourceLine" id="cb47-6" data-line-number="6">       <span class="dt">xlab=</span><span class="st">&quot;log10 proportion (geometric mean)&quot;</span>, </a>
+<a class="sourceLine" id="cb47-7" data-line-number="7">       <span class="dt">ylab=</span><span class="st">&quot;log10 fold change&quot;</span>)</a>
+<a class="sourceLine" id="cb47-8" data-line-number="8"><span class="kw">abline</span>(<span class="dt">h=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="kw">rgb</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">5</span>))</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/sim-maplot-1.png" width="672" /></p>
 <p>Note that, even after filtering out genes that do not have a count of
 5 or more for both samples, there is still substantial variance for
@@ -327,8 +327,8 @@ baseline term for each <code>line</code> (OCT4 or BRG1), and a condition effect
 specific to each line (so comparing treated vs untreated, specific to
 each line). The colon between <code>line</code> and <code>condition</code> specifies to form
 an interaction between those two terms.</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb54-1" data-line-number="1"><span class="kw">library</span>(DESeq2)</a>
-<a class="sourceLine" id="cb54-2" data-line-number="2">dds &lt;-<span class="st"> </span><span class="kw">DESeqDataSet</span>(gse, <span class="dt">design=</span><span class="op">~</span>line <span class="op">+</span><span class="st"> </span>line<span class="op">:</span>condition)</a></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb48-1" data-line-number="1"><span class="kw">library</span>(DESeq2)</a>
+<a class="sourceLine" id="cb48-2" data-line-number="2">dds &lt;-<span class="st"> </span><span class="kw">DESeqDataSet</span>(gse, <span class="dt">design=</span><span class="op">~</span>line <span class="op">+</span><span class="st"> </span>line<span class="op">:</span>condition)</a></code></pre></div>
 <pre><code>## using counts and average transcript lengths from tximeta</code></pre>
 <p>After creating the dataset, I perform some minimal filtering that
 makes sense for bulk RNA-seq. I filter such that there must be at
@@ -336,12 +336,12 @@ least three samples with a count of 10 or more to keep the gene in the
 dataset. This will reduce the size of the dataset (here, removing more
 than half of the genes) and the time needed to fit various per-gene
 parameters, such as dispersion and fold change estimates.</p>
-<div class="sourceCode" id="cb56"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb56-1" data-line-number="1">keep &lt;-<span class="st"> </span><span class="kw">rowSums</span>(<span class="kw">counts</span>(dds) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">3</span></a>
-<a class="sourceLine" id="cb56-2" data-line-number="2"><span class="kw">table</span>(keep)</a></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb50-1" data-line-number="1">keep &lt;-<span class="st"> </span><span class="kw">rowSums</span>(<span class="kw">counts</span>(dds) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">3</span></a>
+<a class="sourceLine" id="cb50-2" data-line-number="2"><span class="kw">table</span>(keep)</a></code></pre></div>
 <pre><code>## keep
 ## FALSE  TRUE 
 ## 30173 23524</code></pre>
-<div class="sourceCode" id="cb58"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb58-1" data-line-number="1">dds &lt;-<span class="st"> </span>dds[keep,]</a></code></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb52-1" data-line-number="1">dds &lt;-<span class="st"> </span>dds[keep,]</a></code></pre></div>
 <p>The parameters are estimated with a single call to the <code>DESeq</code>
 function. For details on all the steps performed by this function,
 check the help page <code>?DESeq</code>, as well as a section of the vignette
@@ -352,7 +352,7 @@ differential sequence depth across libraries. Then <em>DESeq2</em> computes
 and a dispersion parameter that reflects the variation in addition
 to the Poisson variation, around the expected value for each sample
 conditioned on information in the design matrix.</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb59-1" data-line-number="1">dds &lt;-<span class="st"> </span><span class="kw">DESeq</span>(dds)</a></code></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb53-1" data-line-number="1">dds &lt;-<span class="st"> </span><span class="kw">DESeq</span>(dds)</a></code></pre></div>
 <pre><code>## estimating size factors</code></pre>
 <pre><code>## using &#39;avgTxLength&#39; from assays(dds), correcting for library size</code></pre>
 <pre><code>## estimating dispersions</code></pre>
@@ -364,8 +364,8 @@ conditioned on information in the design matrix.</p>
 uses a combination of methods to estimate the dispersion. First, the
 gene-wise estimate is produced using the methods proposed by
 <em>edgeR</em> in 2012 for a Negative Binomial generalized linear model (GLM)
-<span class="citation">(McCarthy, Chen, and Smyth <a href="#ref-McCarthy2012">2012</a>)</span>. Briefly, the maximum adjusted profile likelihood
-estimate is calculated, where the adjustment of <span class="citation">Cox and Reid (<a href="#ref-Cox1987">1987</a>)</span> is used to
+<span class="citation">(<a href="#ref-McCarthy2012">16</a>)</span>. Briefly, the maximum adjusted profile likelihood
+estimate is calculated, where the adjustment of <span class="citation">(<a href="#ref-Cox1987">22</a>)</span> is used to
 avoid a downward bias on the dispersion estimate. This bias adjustment
 is similar in theory to the the use of <span class="math inline">\(\frac{1}{n-1}\)</span> in
 estimating the sample variance.</p>
@@ -380,29 +380,29 @@ sharing information across genes (<code>final</code>, blue points). The blue
 circles at the top of the plot represent genes with high dispersion
 relative to the rest of the dataset, and in these cases, only the
 <code>gene-est</code> estimate is used, without information from other genes.</p>
-<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1"><span class="kw">plotDispEsts</span>(dds, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="fl">1e-3</span>, <span class="fl">.5</span>), <span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="fl">1e5</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb61-1" data-line-number="1"><span class="kw">plotDispEsts</span>(dds, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="fl">1e-3</span>, <span class="fl">.5</span>), <span class="dt">xlim=</span><span class="kw">c</span>(<span class="dv">5</span>,<span class="fl">1e5</span>))</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/disp-ests-1.png" width="672" /></p>
 <p>Below I will continue with per-gene analysis, but first, I demonstrate
 how to examine differences across the most variable genes using a PCA
 plot. Before I compute the principal components, I use the <code>vst</code>
 function to compute a variance stabilizing transformation (VST)
-<span class="citation">(Tibshirani <a href="#ref-Tibshirani1988">1988</a>)</span> of the count data. This is similar to a log2
+<span class="citation">(<a href="#ref-Tibshirani1988">23</a>)</span> of the count data. This is similar to a log2
 transform but avoids inflating the variance of the low count genes.
 For more details on the methods used here to compute the
 transformation, consult the <em>DESeq2</em> vignette or <code>?vst</code>. The specific
 VST used by <em>DESeq2</em> for RNA-seq counts was proposed by the first
-<em>DESeq</em> paper by <span class="citation">Anders and Huber (<a href="#ref-Anders2010">2010</a>)</span>.</p>
+<em>DESeq</em> paper by <span class="citation">(<a href="#ref-Anders2010">24</a>)</span>.</p>
 <p>Another option for performing dimension reduction (as in PCA)
-on count data is to use the Poisson distance <span class="citation">(Witten <a href="#ref-Witten2011">2011</a>)</span>
-or GLM-PCA <span class="citation">(Townes et al. <a href="#ref-Townes2019">2019</a>)</span>. These two alternatives are explored in the
+on count data is to use the Poisson distance <span class="citation">(<a href="#ref-Witten2011">25</a>)</span>
+or GLM-PCA <span class="citation">(<a href="#ref-Townes2019">26</a>)</span>. These two alternatives are explored in the
 <a href="https://bioconductor.org/packages/rnaseqGene">gene-level RNA-seq workflow</a>
-hosted on Bioconductor <span class="citation">(Love et al. <a href="#ref-Love2015">2015</a>)</span>.</p>
+hosted on Bioconductor <span class="citation">(<a href="#ref-Love2015">1</a>)</span>.</p>
 <p>Below I specify <code>blind=FALSE</code> which will use the sample grouping
 information when calculating the per-gene dispersion. The
 transformation itself does not use the design, once the global
 dispersion trend has been fit.</p>
-<div class="sourceCode" id="cb68"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb68-1" data-line-number="1">vsd &lt;-<span class="st"> </span><span class="kw">vst</span>(dds, <span class="dt">blind=</span><span class="ot">FALSE</span>)</a>
-<a class="sourceLine" id="cb68-2" data-line-number="2"><span class="kw">plotPCA</span>(vsd, <span class="dt">intgroup=</span><span class="kw">c</span>(<span class="st">&quot;line&quot;</span>,<span class="st">&quot;condition&quot;</span>))</a></code></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb62-1" data-line-number="1">vsd &lt;-<span class="st"> </span><span class="kw">vst</span>(dds, <span class="dt">blind=</span><span class="ot">FALSE</span>)</a>
+<a class="sourceLine" id="cb62-2" data-line-number="2"><span class="kw">plotPCA</span>(vsd, <span class="dt">intgroup=</span><span class="kw">c</span>(<span class="st">&quot;line&quot;</span>,<span class="st">&quot;condition&quot;</span>))</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/pca-1.png" width="672" /></p>
 <p>We can see that the primary axis of variation among the most variable
 genes is the cell line difference (OCT4 vs BRG1), and the second
@@ -414,11 +414,11 @@ condition in the OCT4 line. The <code>summary</code> function will provide a
 summary table across all genes. We observe more than a thousand genes
 up- and down-regulated with response to treatment for this comparison,
 for a false discovery rate (FDR) cutoff of 10%.</p>
-<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" data-line-number="1"><span class="kw">resultsNames</span>(dds)</a></code></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb63-1" data-line-number="1"><span class="kw">resultsNames</span>(dds)</a></code></pre></div>
 <pre><code>## [1] &quot;Intercept&quot;             &quot;line_BRG1_vs_OCT4&quot;    
 ## [3] &quot;lineOCT4.conditiontrt&quot; &quot;lineBRG1.conditiontrt&quot;</code></pre>
-<div class="sourceCode" id="cb71"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb71-1" data-line-number="1">res &lt;-<span class="st"> </span><span class="kw">results</span>(dds, <span class="dt">name=</span><span class="st">&quot;lineOCT4.conditiontrt&quot;</span>)</a>
-<a class="sourceLine" id="cb71-2" data-line-number="2"><span class="kw">summary</span>(res)</a></code></pre></div>
+<div class="sourceCode" id="cb65"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb65-1" data-line-number="1">res &lt;-<span class="st"> </span><span class="kw">results</span>(dds, <span class="dt">name=</span><span class="st">&quot;lineOCT4.conditiontrt&quot;</span>)</a>
+<a class="sourceLine" id="cb65-2" data-line-number="2"><span class="kw">summary</span>(res)</a></code></pre></div>
 <pre><code>## 
 ## out of 23524 with nonzero total read count
 ## adjusted p-value &lt; 0.1
@@ -437,7 +437,7 @@ should be false positives.</p>
 does not sort the table, this must be done by the user. The top
 three lines correspond to the first three genes in the dataset unless
 the user performs an ordering operation.</p>
-<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" data-line-number="1"><span class="kw">head</span>(res, <span class="dv">3</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb67"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb67-1" data-line-number="1"><span class="kw">head</span>(res, <span class="dv">3</span>)</a></code></pre></div>
 <pre><code>## log2 fold change (MLE): lineOCT4.conditiontrt 
 ## Wald test p-value: lineOCT4.conditiontrt 
 ## DataFrame with 3 rows and 6 columns
@@ -454,39 +454,39 @@ the user performs an ordering operation.</p>
 <p>For example, I can order adjusted p-values from small to large (but
 then remember that this object is no long aligned with rows of <code>dds</code>
 for example).</p>
-<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" data-line-number="1">res.ord &lt;-<span class="st"> </span>res[<span class="kw">order</span>(res<span class="op">$</span>padj),]</a></code></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb69-1" data-line-number="1">res.ord &lt;-<span class="st"> </span>res[<span class="kw">order</span>(res<span class="op">$</span>padj),]</a></code></pre></div>
 <p>I will show how to examine the differences across all genes in an
 MA-plot. But first, I will compute a new estimate of fold change. The
 estimate in the results table above is the MLE, or maximum likelihood
 estimate, which is highly variable for low count genes (as we saw in
 the simulated example). Here I compute a Bayesian estimate for the
-fold change using methods in the <em>apeglm</em> package <span class="citation">(Zhu, Ibrahim, and Love <a href="#ref-Zhu2018">2018</a>)</span>. The
+fold change using methods in the <em>apeglm</em> package <span class="citation">(<a href="#ref-Zhu2018">27</a>)</span>. The
 <em>apeglm</em> functions are wrapped up in a <em>DESeq2</em> function called
 <code>lfcShrink</code>, which produces a table similar to <code>results</code> but with
 shrunken LFC instead of MLE.</p>
-<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" data-line-number="1"><span class="kw">library</span>(apeglm)</a>
-<a class="sourceLine" id="cb76-2" data-line-number="2">lfc &lt;-<span class="st"> </span><span class="kw">lfcShrink</span>(dds, <span class="dt">coef=</span><span class="st">&quot;lineOCT4.conditiontrt&quot;</span>, <span class="dt">type=</span><span class="st">&quot;apeglm&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb70"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb70-1" data-line-number="1"><span class="kw">library</span>(apeglm)</a>
+<a class="sourceLine" id="cb70-2" data-line-number="2">lfc &lt;-<span class="st"> </span><span class="kw">lfcShrink</span>(dds, <span class="dt">coef=</span><span class="st">&quot;lineOCT4.conditiontrt&quot;</span>, <span class="dt">type=</span><span class="st">&quot;apeglm&quot;</span>)</a></code></pre></div>
 <pre><code>## using &#39;apeglm&#39; for LFC shrinkage. If used in published research, please cite:
 ##     Zhu, A., Ibrahim, J.G., Love, M.I. (2018) Heavy-tailed prior distributions for
 ##     sequence count data: removing the noise and preserving large differences.
 ##     Bioinformatics. https://doi.org/10.1093/bioinformatics/bty895</code></pre>
 <p>Another option for shrinkage is to specify <code>type=&quot;ashr&quot;</code> which will
 make use of the <em>ashr</em> package for shrinkage of effect sizes,
-with methods described by <span class="citation">Stephens (<a href="#ref-Stephens2016">2016</a>)</span>.</p>
+with methods described by <span class="citation">(<a href="#ref-Stephens2016">28</a>)</span>.</p>
 <p>We can now examine the differences between the MLE and the Bayesian
 estimate of fold change from <em>apeglm</em>. First the MLE:</p>
-<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" data-line-number="1"><span class="kw">plotMA</span>(res, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>), </a>
-<a class="sourceLine" id="cb78-2" data-line-number="2">       <span class="dt">colNonSig=</span><span class="st">&quot;grey60&quot;</span>, <span class="dt">colSig=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">colLine=</span><span class="st">&quot;grey40&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb72"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb72-1" data-line-number="1"><span class="kw">plotMA</span>(res, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>), </a>
+<a class="sourceLine" id="cb72-2" data-line-number="2">       <span class="dt">colNonSig=</span><span class="st">&quot;grey60&quot;</span>, <span class="dt">colSig=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">colLine=</span><span class="st">&quot;grey40&quot;</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/ma-mle-1.png" width="672" /></p>
 <p>The genes passing a 10% FDR threshold are colored in blue. Note the
 wide variability on the left side of the plot. This is mostly due
 to imprecision in our estimates.</p>
 <p>After applying the Bayesian shrinkage procedure, the variability
 due to imprecision on the left side of the plot is reduced. In the
-paper by <span class="citation">Zhu, Ibrahim, and Love (<a href="#ref-Zhu2018">2018</a>)</span>, it is demonstrated that the shrunken LFC are better
+paper by <span class="citation">(<a href="#ref-Zhu2018">27</a>)</span>, it is demonstrated that the shrunken LFC are better
 suited for ranking genes by effect size.</p>
-<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" data-line-number="1"><span class="kw">plotMA</span>(lfc, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>), </a>
-<a class="sourceLine" id="cb79-2" data-line-number="2">       <span class="dt">colNonSig=</span><span class="st">&quot;grey60&quot;</span>, <span class="dt">colSig=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">colLine=</span><span class="st">&quot;grey40&quot;</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb73"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb73-1" data-line-number="1"><span class="kw">plotMA</span>(lfc, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>), </a>
+<a class="sourceLine" id="cb73-2" data-line-number="2">       <span class="dt">colNonSig=</span><span class="st">&quot;grey60&quot;</span>, <span class="dt">colSig=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">colLine=</span><span class="st">&quot;grey40&quot;</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/ma-shrink-1.png" width="672" /></p>
 <p>For ranking genes by effect size, one would rank by
 <code>abs(log2FoldChange)</code> (with <code>decreasing=TRUE</code>), instead of by <code>padj</code>.</p>
@@ -500,62 +500,62 @@ effect size, and biological interpretation. Because I have not
 re-ordered the <code>lfc</code> results table, I can add the <code>SYMBOL</code> column from
 the <code>dds</code> object to the results table, and then create a smaller table
 with our genes of interest.</p>
-<div class="sourceCode" id="cb80"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb80-1" data-line-number="1">lfc<span class="op">$</span>SYMBOL &lt;-<span class="st"> </span><span class="kw">mcols</span>(dds)<span class="op">$</span>SYMBOL</a>
-<a class="sourceLine" id="cb80-2" data-line-number="2">tab &lt;-<span class="st"> </span>lfc <span class="op">%&gt;%</span><span class="st"> </span>as.data.frame <span class="op">%&gt;%</span></a>
-<a class="sourceLine" id="cb80-3" data-line-number="3"><span class="st">        </span><span class="kw">filter</span>(<span class="kw">between</span>(baseMean, <span class="fl">1e4</span>, <span class="fl">1e5</span>), </a>
-<a class="sourceLine" id="cb80-4" data-line-number="4">               <span class="kw">between</span>(<span class="kw">abs</span>(log2FoldChange), <span class="dv">1</span>, <span class="dv">4</span>))</a>
-<a class="sourceLine" id="cb80-5" data-line-number="5">tab &lt;-<span class="st"> </span>tab[<span class="kw">complete.cases</span>(tab),]</a></code></pre></div>
+<div class="sourceCode" id="cb74"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb74-1" data-line-number="1">lfc<span class="op">$</span>SYMBOL &lt;-<span class="st"> </span><span class="kw">mcols</span>(dds)<span class="op">$</span>SYMBOL</a>
+<a class="sourceLine" id="cb74-2" data-line-number="2">tab &lt;-<span class="st"> </span>lfc <span class="op">%&gt;%</span><span class="st"> </span>as.data.frame <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb74-3" data-line-number="3"><span class="st">        </span><span class="kw">filter</span>(<span class="kw">between</span>(baseMean, <span class="fl">1e4</span>, <span class="fl">1e5</span>), </a>
+<a class="sourceLine" id="cb74-4" data-line-number="4">               <span class="kw">between</span>(<span class="kw">abs</span>(log2FoldChange), <span class="dv">1</span>, <span class="dv">4</span>))</a>
+<a class="sourceLine" id="cb74-5" data-line-number="5">tab &lt;-<span class="st"> </span>tab[<span class="kw">complete.cases</span>(tab),]</a></code></pre></div>
 <p>I now highlight the genes in <code>tab</code> using the <code>points</code> and <code>text</code>
 functions.</p>
-<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" data-line-number="1"><span class="kw">plotMA</span>(lfc, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>),</a>
-<a class="sourceLine" id="cb81-2" data-line-number="2">       <span class="dt">colNonSig=</span><span class="st">&quot;grey60&quot;</span>, <span class="dt">colSig=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">colLine=</span><span class="st">&quot;grey40&quot;</span>)</a>
-<a class="sourceLine" id="cb81-3" data-line-number="3"><span class="kw">with</span>(tab, {</a>
-<a class="sourceLine" id="cb81-4" data-line-number="4">        <span class="kw">points</span>(baseMean, log2FoldChange, <span class="dt">cex=</span><span class="dv">2</span>, <span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</a>
-<a class="sourceLine" id="cb81-5" data-line-number="5">        <span class="kw">text</span>(baseMean, log2FoldChange, SYMBOL, <span class="dt">pos=</span><span class="dv">4</span>, <span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</a>
-<a class="sourceLine" id="cb81-6" data-line-number="6">})</a></code></pre></div>
+<div class="sourceCode" id="cb75"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb75-1" data-line-number="1"><span class="kw">plotMA</span>(lfc, <span class="dt">ylim=</span><span class="kw">c</span>(<span class="op">-</span><span class="dv">4</span>,<span class="dv">4</span>),</a>
+<a class="sourceLine" id="cb75-2" data-line-number="2">       <span class="dt">colNonSig=</span><span class="st">&quot;grey60&quot;</span>, <span class="dt">colSig=</span><span class="st">&quot;blue&quot;</span>, <span class="dt">colLine=</span><span class="st">&quot;grey40&quot;</span>)</a>
+<a class="sourceLine" id="cb75-3" data-line-number="3"><span class="kw">with</span>(tab, {</a>
+<a class="sourceLine" id="cb75-4" data-line-number="4">        <span class="kw">points</span>(baseMean, log2FoldChange, <span class="dt">cex=</span><span class="dv">2</span>, <span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb75-5" data-line-number="5">        <span class="kw">text</span>(baseMean, log2FoldChange, SYMBOL, <span class="dt">pos=</span><span class="dv">4</span>, <span class="dt">col=</span><span class="st">&quot;blue&quot;</span>)</a>
+<a class="sourceLine" id="cb75-6" data-line-number="6">})</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/ma-symbols-1.png" width="672" /></p>
 <p>That worked, although it’s not easy to see the labels for a set of
 overlapping points below the horizontal axis. I can make a nicer
 looking plot using <em>ggplot2</em>. First I create a data frame that I
 will pass to the <code>ggplot</code> function.</p>
-<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb82-1" data-line-number="1">dat &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(lfc)</a>
-<a class="sourceLine" id="cb82-2" data-line-number="2">dat &lt;-<span class="st"> </span>dat[<span class="kw">complete.cases</span>(dat),]</a>
-<a class="sourceLine" id="cb82-3" data-line-number="3">dat &lt;-<span class="st"> </span>dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">sig =</span> <span class="kw">ifelse</span>(padj <span class="op">&lt;</span><span class="st"> </span><span class="fl">.1</span>, <span class="st">&quot;Y&quot;</span>, <span class="st">&quot;N&quot;</span>))</a>
-<a class="sourceLine" id="cb82-4" data-line-number="4">tab<span class="op">$</span>sig &lt;-<span class="st"> &quot;Y&quot;</span></a></code></pre></div>
+<div class="sourceCode" id="cb76"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb76-1" data-line-number="1">dat &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(lfc)</a>
+<a class="sourceLine" id="cb76-2" data-line-number="2">dat &lt;-<span class="st"> </span>dat[<span class="kw">complete.cases</span>(dat),]</a>
+<a class="sourceLine" id="cb76-3" data-line-number="3">dat &lt;-<span class="st"> </span>dat <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">mutate</span>(<span class="dt">sig =</span> <span class="kw">ifelse</span>(padj <span class="op">&lt;</span><span class="st"> </span><span class="fl">.1</span>, <span class="st">&quot;Y&quot;</span>, <span class="st">&quot;N&quot;</span>))</a>
+<a class="sourceLine" id="cb76-4" data-line-number="4">tab<span class="op">$</span>sig &lt;-<span class="st"> &quot;Y&quot;</span></a></code></pre></div>
 <p>The following <code>ggplot</code> code chunk recreates the MA-plot that is
 built into <em>DESeq2</em>, but also uses the <em>ggrepel</em> package to make sure
 the point labels for our genes of interest do not overlap:</p>
-<div class="sourceCode" id="cb83"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb83-1" data-line-number="1"><span class="kw">library</span>(ggplot2)</a>
-<a class="sourceLine" id="cb83-2" data-line-number="2"><span class="kw">library</span>(ggrepel)</a>
-<a class="sourceLine" id="cb83-3" data-line-number="3"><span class="kw">ggplot</span>(dat, <span class="kw">aes</span>(baseMean, log2FoldChange, <span class="dt">col=</span>sig, <span class="dt">label=</span>SYMBOL)) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb83-4" data-line-number="4"><span class="st">        </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span><span class="kw">scale_x_log10</span>() <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb83-5" data-line-number="5"><span class="st">        </span><span class="kw">xlab</span>(<span class="st">&quot;mean of normalized counts&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb83-6" data-line-number="6"><span class="st">        </span><span class="kw">ylab</span>(<span class="st">&quot;log fold change&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb83-7" data-line-number="7"><span class="st">        </span><span class="kw">geom_hline</span>(<span class="dt">yintercept=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="st">&quot;grey40&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb83-8" data-line-number="8"><span class="st">        </span><span class="kw">scale_color_manual</span>(<span class="dt">values=</span><span class="kw">c</span>(<span class="st">&quot;grey60&quot;</span>, <span class="st">&quot;blue&quot;</span>)) <span class="op">+</span></a>
-<a class="sourceLine" id="cb83-9" data-line-number="9"><span class="st">        </span><span class="kw">geom_point</span>(<span class="dt">data=</span>tab, <span class="dt">shape=</span><span class="dv">1</span>, <span class="dt">size=</span><span class="dv">5</span>, <span class="dt">show.legend=</span><span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb83-10" data-line-number="10"><span class="st">        </span><span class="kw">geom_label_repel</span>(<span class="dt">data=</span>tab,</a>
-<a class="sourceLine" id="cb83-11" data-line-number="11">                         <span class="dt">nudge_x =</span> <span class="dv">1</span>,</a>
-<a class="sourceLine" id="cb83-12" data-line-number="12">                         <span class="dt">nudge_y =</span> <span class="dv">2</span><span class="op">*</span><span class="kw">sign</span>(tab<span class="op">$</span>log2FoldChange),</a>
-<a class="sourceLine" id="cb83-13" data-line-number="13">                         <span class="dt">show.legend=</span><span class="ot">FALSE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb77"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb77-1" data-line-number="1"><span class="kw">library</span>(ggplot2)</a>
+<a class="sourceLine" id="cb77-2" data-line-number="2"><span class="kw">library</span>(ggrepel)</a>
+<a class="sourceLine" id="cb77-3" data-line-number="3"><span class="kw">ggplot</span>(dat, <span class="kw">aes</span>(baseMean, log2FoldChange, <span class="dt">col=</span>sig, <span class="dt">label=</span>SYMBOL)) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb77-4" data-line-number="4"><span class="st">        </span><span class="kw">geom_point</span>() <span class="op">+</span><span class="st"> </span><span class="kw">scale_x_log10</span>() <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb77-5" data-line-number="5"><span class="st">        </span><span class="kw">xlab</span>(<span class="st">&quot;mean of normalized counts&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb77-6" data-line-number="6"><span class="st">        </span><span class="kw">ylab</span>(<span class="st">&quot;log fold change&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb77-7" data-line-number="7"><span class="st">        </span><span class="kw">geom_hline</span>(<span class="dt">yintercept=</span><span class="dv">0</span>, <span class="dt">col=</span><span class="st">&quot;grey40&quot;</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb77-8" data-line-number="8"><span class="st">        </span><span class="kw">scale_color_manual</span>(<span class="dt">values=</span><span class="kw">c</span>(<span class="st">&quot;grey60&quot;</span>, <span class="st">&quot;blue&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb77-9" data-line-number="9"><span class="st">        </span><span class="kw">geom_point</span>(<span class="dt">data=</span>tab, <span class="dt">shape=</span><span class="dv">1</span>, <span class="dt">size=</span><span class="dv">5</span>, <span class="dt">show.legend=</span><span class="ot">FALSE</span>) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb77-10" data-line-number="10"><span class="st">        </span><span class="kw">geom_label_repel</span>(<span class="dt">data=</span>tab,</a>
+<a class="sourceLine" id="cb77-11" data-line-number="11">                         <span class="dt">nudge_x =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb77-12" data-line-number="12">                         <span class="dt">nudge_y =</span> <span class="dv">2</span><span class="op">*</span><span class="kw">sign</span>(tab<span class="op">$</span>log2FoldChange),</a>
+<a class="sourceLine" id="cb77-13" data-line-number="13">                         <span class="dt">show.legend=</span><span class="ot">FALSE</span>)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/ma-repel-1.png" width="672" /></p>
 </div>
 <div id="hypothesis-weighting" class="section level2">
 <h2><span class="header-section-number">2.3</span> Hypothesis weighting</h2>
 <p>In the last series of code chunks, I will demonstrate the use of
-Independent Hypothesis Weighting (IHW) <span class="citation">(Ignatiadis et al. <a href="#ref-Ignatiadis2016">2016</a>)</span>, in lieu of
+Independent Hypothesis Weighting (IHW) <span class="citation">(<a href="#ref-Ignatiadis2016">19</a>)</span>, in lieu of
 the more simplistic mean count filtering that is used in <code>results</code>
 by default. Instead of finding a threshold on the mean of scaled
 counts that optimizes the number of rejected hypotheses following
-Benjamini-Hochberg correction <span class="citation">(Benjamini and Hochberg <a href="#ref-Benjamini1995">1995</a>)</span>, the <em>IHW</em> package
+Benjamini-Hochberg correction <span class="citation">(<a href="#ref-Benjamini1995">29</a>)</span>, the <em>IHW</em> package
 finds an optimal weighting of the hypotheses that maximizes power
 while still controlling the FDR.</p>
 <p>To use <em>IHW</em> instead of mean count thresholding, I pass the <code>ihw</code>
 function to the <code>filterFun</code> argument of <code>results</code>. A similar number
 of genes are detected as differentially expressed in this case.</p>
-<div class="sourceCode" id="cb84"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb84-1" data-line-number="1"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(IHW))</a></code></pre></div>
-<div class="sourceCode" id="cb85"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb85-1" data-line-number="1">res.ihw &lt;-<span class="st"> </span><span class="kw">results</span>(dds, <span class="dt">name=</span><span class="st">&quot;lineOCT4.conditiontrt&quot;</span>, <span class="dt">filterFun=</span>ihw)</a>
-<a class="sourceLine" id="cb85-2" data-line-number="2"><span class="kw">summary</span>(res.ihw)</a></code></pre></div>
+<div class="sourceCode" id="cb78"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb78-1" data-line-number="1"><span class="kw">suppressPackageStartupMessages</span>(<span class="kw">library</span>(IHW))</a></code></pre></div>
+<div class="sourceCode" id="cb79"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb79-1" data-line-number="1">res.ihw &lt;-<span class="st"> </span><span class="kw">results</span>(dds, <span class="dt">name=</span><span class="st">&quot;lineOCT4.conditiontrt&quot;</span>, <span class="dt">filterFun=</span>ihw)</a>
+<a class="sourceLine" id="cb79-2" data-line-number="2"><span class="kw">summary</span>(res.ihw)</a></code></pre></div>
 <pre><code>## 
 ## out of 23524 with nonzero total read count
 ## adjusted p-value &lt; 0.1
@@ -567,14 +567,14 @@ of genes are detected as differentially expressed in this case.</p>
 <p>We can observe the weighting of hypotheses for various mean count
 ranges, across the cross-validation folds. For more details on the
 methods used here, consult the <em>IHW</em> package vignette and the
-publication by <span class="citation">Ignatiadis et al. (<a href="#ref-Ignatiadis2016">2016</a>)</span>.</p>
-<div class="sourceCode" id="cb87"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb87-1" data-line-number="1">ihw.obj &lt;-<span class="st"> </span><span class="kw">metadata</span>(res.ihw)<span class="op">$</span>ihwResult</a>
-<a class="sourceLine" id="cb87-2" data-line-number="2"><span class="kw">plot</span>(ihw.obj)</a></code></pre></div>
+publication by <span class="citation">(<a href="#ref-Ignatiadis2016">19</a>)</span>.</p>
+<div class="sourceCode" id="cb81"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb81-1" data-line-number="1">ihw.obj &lt;-<span class="st"> </span><span class="kw">metadata</span>(res.ihw)<span class="op">$</span>ihwResult</a>
+<a class="sourceLine" id="cb81-2" data-line-number="2"><span class="kw">plot</span>(ihw.obj)</a></code></pre></div>
 <p><img src="Statistical-Modeling-of-High-Dimensional-Counts_files/figure-html/ihw-obj-1.png" width="672" /></p>
 <p>Again, we can show that a similar set of genes were found in this case
 although in general the <em>IHW</em> procedure can outperform the simple
 filtering rules that <code>results</code> uses by default.</p>
-<div class="sourceCode" id="cb88"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb88-1" data-line-number="1"><span class="kw">table</span>(<span class="dt">filter=</span>res<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>, <span class="dt">IHW=</span>res.ihw<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb82"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb82-1" data-line-number="1"><span class="kw">table</span>(<span class="dt">filter=</span>res<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>, <span class="dt">IHW=</span>res.ihw<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>)</a></code></pre></div>
 <pre><code>##        IHW
 ## filter  FALSE  TRUE
 ##   FALSE 20616   145
@@ -584,59 +584,59 @@ filtering rules that <code>results</code> uses by default.</p>
 </div>
 <h3> References</h3>
 <div id="refs" class="references">
-<div id="ref-Anders2010">
-<p>Anders, Simon, and Wolfgang Huber. 2010. “Differential Expression Analysis for Sequence Count Data.” <em>Genome Biology</em> 11: R106. <a href="https://doi.org/10.1186/gb-2010-11-10-r106">https://doi.org/10.1186/gb-2010-11-10-r106</a>.</p>
-</div>
-<div id="ref-Benjamini1995">
-<p>Benjamini, Yoav, and Yosef Hochberg. 1995. “Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing.” <em>Journal of the Royal Statistical Society B</em> 57: 289–300. <a href="https://doi.org/10.1111/j.2517-6161.1995.tb02031.x">https://doi.org/10.1111/j.2517-6161.1995.tb02031.x</a>.</p>
-</div>
-<div id="ref-Cox1987">
-<p>Cox, D. R., and N. Reid. 1987. “Parameter orthogonality and approximate conditional inference.” <em>Journal of the Royal Statistical Society, Series B</em> 49 (1): 1–39. <a href="https://doi.org/10.1111/j.2517-6161.1987.tb01422.x">https://doi.org/10.1111/j.2517-6161.1987.tb01422.x</a>.</p>
-</div>
-<div id="ref-Dudoit2002">
-<p>Dudoit, Sandrine, Yee Hwa Yang, Matthew J. Callow, and Terence P. Speed. 2002. “Statistical methods for identifying differentially expressed genes in replicated cDNA microarray experiments.” <em>Statistica Sinica</em> 12 (1). Institute of Statistical Science, Academia Sinica: 111–39. <a href="http://www.jstor.org/stable/24307038">http://www.jstor.org/stable/24307038</a>.</p>
-</div>
-<div id="ref-Ignatiadis2016">
-<p>Ignatiadis, Nikolaos, Bernd Klaus, Judith Zaugg, and Wolfgang Huber. 2016. “Data-Driven Hypothesis Weighting Increases Detection Power in Genome-Scale Multiple Testing.” <em>Nature Methods</em>. <a href="https://doi.org/10.1038/nmeth.3885">https://doi.org/10.1038/nmeth.3885</a>.</p>
-</div>
-<div id="ref-Law2014">
-<p>Law, Charity W., Yunshun Chen, Wei Shi, and Gordon K. Smyth. 2014. “voom: precision weights unlock linear model analysis tools for RNA-seq read counts.” <em>Genome Biology</em> 15 (2): 29. <a href="https://doi.org/10.1186/gb-2014-15-2-r29">https://doi.org/10.1186/gb-2014-15-2-r29</a>.</p>
-</div>
 <div id="ref-Love2015">
-<p>Love, MI, S Anders, V Kim, and W Huber. 2015. “RNA-Seq Workflow: Gene-Level Exploratory Analysis and Differential Expression.” <em>F1000Research</em> 4 (1070). <a href="https://doi.org/10.12688/f1000research.7035">https://doi.org/10.12688/f1000research.7035</a>.</p>
-</div>
-<div id="ref-Love2014">
-<p>Love, Michael I., Wolfgang Huber, and Simon Anders. 2014. “Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2.” <em>Genome Biology</em> 15 (12): 550. <a href="https://doi.org/10.1186/s13059-014-0550-8">https://doi.org/10.1186/s13059-014-0550-8</a>.</p>
-</div>
-<div id="ref-McCarthy2012">
-<p>McCarthy, Davis J, Yunshun Chen, and Gordon K Smyth. 2012. “Differential expression analysis of multifactor RNA-Seq experiments with respect to biological variation.” <em>Nucleic Acids Research</em> 40 (January): 4288–97. <a href="https://doi.org/10.1093/nar/gks042">https://doi.org/10.1093/nar/gks042</a>.</p>
+<p>1. Love M, Anders S, Kim V, Huber W. 2015. RNA-seq workflow: Gene-level exploratory analysis and differential expression. <em>F1000Research</em>. 4(1070):</p>
 </div>
 <div id="ref-Patro2017">
-<p>Patro, R, G Duggal, MI Love, RA Irizarry, and C Kingsford. 2017. “Salmon Provides Fast and Bias-Aware Quantification of Transcript Expression.” <em>Nature Methods</em> 14: 417–19. <a href="https://doi.org/10.1038/nmeth.4197">https://doi.org/10.1038/nmeth.4197</a>.</p>
+<p>6. Patro R, Duggal G, Love M, Irizarry R, Kingsford C. 2017. Salmon provides fast and bias-aware quantification of transcript expression. <em>Nature Methods</em>. 14:417–19</p>
 </div>
-<div id="ref-Roberts2000">
-<p>Roberts, Christopher J., Bryce Nelson, Matthew J. Marton, Roland Stoughton, Michael R. Meyer, Holly A. Bennett, Yudong D. He, et al. 2000. “Signaling and Circuitry of Multiple Mapk Pathways Revealed by a Matrix of Global Gene Expression Profiles.” <em>Science</em> 287 (5454): 873–80. <a href="https://doi.org/10.1126/science.287.5454.873">https://doi.org/10.1126/science.287.5454.873</a>.</p>
+<div id="ref-Love2014">
+<p>14. Love MI, Huber W, Anders S. 2014. Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. <em>Genome Biology</em>. 15(12):550</p>
 </div>
 <div id="ref-Robinson2010">
-<p>Robinson, Mark D., Davis J. McCarthy, and Gordon K. Smyth. 2010. “edgeR: a Bioconductor package for differential expression analysis of digital gene expression data.” <em>Bioinformatics</em> 26 (1): 139. <a href="https://doi.org/10.1093/bioinformatics/btp616">https://doi.org/10.1093/bioinformatics/btp616</a>.</p>
+<p>15. Robinson MD, McCarthy DJ, Smyth GK. 2010. edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. <em>Bioinformatics</em>. 26(1):139</p>
 </div>
-<div id="ref-Stephens2016">
-<p>Stephens, Matthew. 2016. “False Discovery Rates: A New Deal.” <em>Biostatistics</em> 18 (2). <a href="https://doi.org/10.1093/biostatistics/kxw041">https://doi.org/10.1093/biostatistics/kxw041</a>.</p>
+<div id="ref-McCarthy2012">
+<p>16. McCarthy DJ, Chen Y, Smyth GK. 2012. Differential expression analysis of multifactor RNA-Seq experiments with respect to biological variation. <em>Nucleic Acids Research</em>. 40:4288–97</p>
 </div>
-<div id="ref-Tibshirani1988">
-<p>Tibshirani, Robert. 1988. “Estimating Transformations for Regression via Additivity and Variance Stabilization.” <em>Journal of the American Statistical Association</em> 83: 394–405. <a href="https://doi.org/10.1080/01621459.1988.10478610">https://doi.org/10.1080/01621459.1988.10478610</a>.</p>
-</div>
-<div id="ref-Townes2019">
-<p>Townes, F. William, Stephanie C. Hicks, Martin J. Aryee, and Rafael A. Irizarry. 2019. “Feature Selection and Dimension Reduction for Single Cell RNA-Seq based on a Multinomial Model.” <em>bioRxiv</em>. Cold Spring Harbor Laboratory. <a href="https://doi.org/10.1101/574574">https://doi.org/10.1101/574574</a>.</p>
-</div>
-<div id="ref-Witten2011">
-<p>Witten, Daniela M. 2011. “Classification and clustering of sequencing data using a Poisson model.” <em>The Annals of Applied Statistics</em> 5 (4): 2493–2518. <a href="https://doi.org/10.1214/11-AOAS493">https://doi.org/10.1214/11-AOAS493</a>.</p>
+<div id="ref-Law2014">
+<p>17. Law CW, Chen Y, Shi W, Smyth GK. 2014. voom: precision weights unlock linear model analysis tools for RNA-seq read counts. <em>Genome Biology</em>. 15(2):29</p>
 </div>
 <div id="ref-Wu2012">
-<p>Wu, Hao, Chi Wang, and Zhijin Wu. 2012. “A new shrinkage estimator for dispersion improves differential expression detection in RNA-seq data.” <em>Biostatistics</em>, September. Oxford University Press. <a href="https://doi.org/10.1093/biostatistics/kxs033">https://doi.org/10.1093/biostatistics/kxs033</a>.</p>
+<p>18. Wu H, Wang C, Wu Z. 2012. A new shrinkage estimator for dispersion improves differential expression detection in RNA-seq data. <em>Biostatistics</em></p>
+</div>
+<div id="ref-Ignatiadis2016">
+<p>19. Ignatiadis N, Klaus B, Zaugg J, Huber W. 2016. Data-driven hypothesis weighting increases detection power in genome-scale multiple testing. <em>Nature Methods</em></p>
+</div>
+<div id="ref-Dudoit2002">
+<p>20. Dudoit S, Yang YH, Callow MJ, Speed TP. 2002. Statistical methods for identifying differentially expressed genes in replicated cDNA microarray experiments. <em>Statistica Sinica</em>. 12(1):111–39</p>
+</div>
+<div id="ref-Roberts2000">
+<p>21. Roberts CJ, Nelson B, Marton MJ, Stoughton R, Meyer MR, et al. 2000. Signaling and circuitry of multiple mapk pathways revealed by a matrix of global gene expression profiles. <em>Science</em>. 287(5454):873–80</p>
+</div>
+<div id="ref-Cox1987">
+<p>22. Cox DR, Reid N. 1987. Parameter orthogonality and approximate conditional inference. <em>Journal of the Royal Statistical Society, Series B</em>. 49(1):1–39</p>
+</div>
+<div id="ref-Tibshirani1988">
+<p>23. Tibshirani R. 1988. Estimating transformations for regression via additivity and variance stabilization. <em>Journal of the American Statistical Association</em>. 83:394–405</p>
+</div>
+<div id="ref-Anders2010">
+<p>24. Anders S, Huber W. 2010. Differential expression analysis for sequence count data. <em>Genome Biology</em>. 11:R106</p>
+</div>
+<div id="ref-Witten2011">
+<p>25. Witten DM. 2011. Classification and clustering of sequencing data using a Poisson model. <em>The Annals of Applied Statistics</em>. 5(4):2493–2518</p>
+</div>
+<div id="ref-Townes2019">
+<p>26. Townes FW, Hicks SC, Aryee MJ, Irizarry RA. 2019. Feature Selection and Dimension Reduction for Single Cell RNA-Seq based on a Multinomial Model. <em>bioRxiv</em></p>
 </div>
 <div id="ref-Zhu2018">
-<p>Zhu, Anqi, Joseph G. Ibrahim, and Michael I. Love. 2018. “Heavy-Tailed Prior Distributions for Sequence Count Data: Removing the Noise and Preserving Large Differences.” <em>Bioinformatics</em>. <a href="https://doi.org/10.1093/bioinformatics/bty895">https://doi.org/10.1093/bioinformatics/bty895</a>.</p>
+<p>27. Zhu A, Ibrahim JG, Love MI. 2018. Heavy-tailed prior distributions for sequence count data: Removing the noise and preserving large differences. <em>Bioinformatics</em></p>
+</div>
+<div id="ref-Stephens2016">
+<p>28. Stephens M. 2016. False discovery rates: A new deal. <em>Biostatistics</em>. 18(2):</p>
+</div>
+<div id="ref-Benjamini1995">
+<p>29. Benjamini Y, Hochberg Y. 1995. Controlling the false discovery rate: A practical and powerful approach to multiple testing. <em>Journal of the Royal Statistical Society B</em>. 57:289–300</p>
 </div>
 </div>
             </section>
