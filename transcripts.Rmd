@@ -87,9 +87,10 @@ sequencing depth differences. Here, *Swish* will make use of multiple
 values in each cell of the count matrix that were computed by the
 *Salmon* software, using a technique called Gibbs sampling. For more
 details on the Gibbs sampling procedure, consult the publication of
-*Salmon* [@Patro2017] and *mmseq* [@Turro2011]. Finally, the false
-discovery rate of the test statistics averaged over the multiple
-versions (or "inferential replicates") of the counts matrix is 
+*Salmon* [@Patro2017] and *mmseq* [@Turro2011]. 
+Finally, the test statistics are averaged over the multiple
+versions (or "inferential replicates") of the counts matrix,
+and q-values for false discovery rate estimation are
 computed via a permutation technique [@Storey2003].
 
 I begin by locating the files in the *macrophage* package. As before,

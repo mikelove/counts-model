@@ -247,9 +247,11 @@ sequencing depth differences. Here, <em>Swish</em> will make use of multiple
 values in each cell of the count matrix that were computed by the
 <em>Salmon</em> software, using a technique called Gibbs sampling. For more
 details on the Gibbs sampling procedure, consult the publication of
-<em>Salmon</em> <span class="citation">(<a href="#ref-Patro2017">6</a>)</span> and <em>mmseq</em> <span class="citation">(<a href="#ref-Turro2011">43</a>)</span>. Finally, the false
-discovery rate of the test statistics averaged over the multiple
-versions (or “inferential replicates”) of the counts matrix is
+<em>Salmon</em> <span class="citation">(<a href="#ref-Patro2017">6</a>)</span>
+and <em>mmseq</em> <span class="citation">(<a href="#ref-Turro2011">43</a>)</span>.
+Finally, the test statistics are averaged over the multiple
+versions (or "inferential replicates") of the counts matrix,
+and q-values for false discovery rate estimation are
 computed via a permutation technique <span class="citation">(<a href="#ref-Storey2003">44</a>)</span>.</p>
 <p>I begin by locating the files in the <em>macrophage</em> package. As before,
 this step is not useful for a typical RNA-seq workflow, as the data
